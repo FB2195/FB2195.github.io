@@ -1,0 +1,453 @@
+import {
+  ClubEvent,
+  Channel,
+  ChatMessage,
+  FormTemplate,
+  MatchResult,
+  NewsItem,
+  Player,
+  Survey,
+  TableRow,
+  TeamInfo,
+} from '../types';
+
+export const TEAMS: TeamInfo[] = [
+  { id: 'herren1', name: '1. Mannschaft (Herren)', category: 'senior' },
+  { id: 'ah', name: 'Alte Herren', category: 'senior' },
+  { id: 'u19', name: 'U19 Jugend', category: 'jugend' },
+  { id: 'u17', name: 'U17 Jugend', category: 'jugend' },
+  { id: 'u15', name: 'U15 Jugend', category: 'jugend' },
+  { id: 'u13', name: 'U13 Jugend', category: 'jugend' },
+  { id: 'bambini', name: 'Bambini', category: 'jugend' },
+];
+
+export const teamName = (id?: string): string =>
+  TEAMS.find((t) => t.id === id)?.name ?? 'Unbekanntes Team';
+
+export const YOUTH_TEAMS = TEAMS.filter((t) => t.category === 'jugend');
+export const SENIOR_TEAMS = TEAMS.filter((t) => t.category === 'senior');
+
+export const EVENTS: ClubEvent[] = [
+  {
+    id: 'e1',
+    title: 'Training 1. Mannschaft',
+    date: '2026-07-29',
+    time: '18:30',
+    endTime: '20:00',
+    location: 'Sportgelände FC Türk Hof, Platz 1',
+    type: 'training',
+    teamId: 'herren1',
+    description: 'Reguläres Abschlusstraining vor dem Pokalspiel.',
+  },
+  {
+    id: 'e2',
+    title: 'Vorstandssitzung',
+    date: '2026-07-30',
+    time: '19:00',
+    endTime: '21:00',
+    location: 'Vereinsheim, Besprechungsraum',
+    type: 'sonstiges',
+    teamId: 'herren1',
+    description: 'Planung Saisonstart und Sponsoring-Update.',
+  },
+  {
+    id: 'e3',
+    title: 'Kreispokal: FC Türk Hof – SV Oberkotzau',
+    date: '2026-08-02',
+    time: '15:00',
+    endTime: '17:00',
+    location: 'Sportgelände FC Türk Hof, Platz 1',
+    type: 'spiel',
+    teamId: 'herren1',
+    description: '1. Runde Kreispokal. Einlass ab 14:00 Uhr.',
+  },
+  {
+    id: 'e4',
+    title: 'Training U19',
+    date: '2026-07-31',
+    time: '17:30',
+    endTime: '19:00',
+    location: 'Sportgelände FC Türk Hof, Platz 2',
+    type: 'training',
+    teamId: 'u19',
+  },
+  {
+    id: 'e5',
+    title: 'Freundschaftsspiel U15',
+    date: '2026-08-01',
+    time: '11:00',
+    endTime: '12:30',
+    location: 'Sportgelände TSV Hof',
+    type: 'spiel',
+    teamId: 'u15',
+    description: 'Testspiel gegen TSV Hof zur Saisonvorbereitung.',
+  },
+  {
+    id: 'e6',
+    title: 'Trikot-Ausgabe Bambini',
+    date: '2026-08-03',
+    time: '16:00',
+    endTime: '17:00',
+    location: 'Vereinsheim',
+    type: 'sonstiges',
+    teamId: 'bambini',
+  },
+  {
+    id: 'e7',
+    title: 'Training U13',
+    date: '2026-07-30',
+    time: '17:00',
+    endTime: '18:15',
+    location: 'Sportgelände FC Türk Hof, Platz 2',
+    type: 'training',
+    teamId: 'u13',
+  },
+  {
+    id: 'e8',
+    title: 'Sommerfest FC Türk Hof',
+    date: '2026-08-09',
+    time: '14:00',
+    endTime: '22:00',
+    location: 'Vereinsgelände',
+    type: 'sonstiges',
+    teamId: 'herren1',
+    description: 'Vereinsfest für alle Mitglieder, Familien und Fans.',
+  },
+];
+
+export const NEWS: NewsItem[] = [
+  {
+    id: 'n1',
+    title: 'Saisonvorbereitung läuft auf Hochtouren',
+    date: '2026-07-27',
+    tag: 'Verein',
+    summary: 'Die 1. Mannschaft startet mit intensiven Einheiten in die neue Saison.',
+    content:
+      'Unsere 1. Mannschaft ist seit dieser Woche wieder im Training. Trainer Cem Yildiz setzt in den ersten Wochen vor allem auf Kondition und Teambuilding. Am 2. August steht bereits das erste Pflichtspiel im Kreispokal gegen den SV Oberkotzau an. Wir freuen uns auf zahlreiche Zuschauer!',
+  },
+  {
+    id: 'n2',
+    title: 'Neue Trikots für alle Jugendmannschaften',
+    date: '2026-07-24',
+    tag: 'Jugend',
+    summary: 'Dank unseres Sponsors erhalten alle Jugendteams neue Trikotsätze.',
+    content:
+      'Wir bedanken uns herzlich bei unserem langjährigen Sponsor Hofer Getränkemarkt für die Ausstattung aller Jugendmannschaften mit neuen Trikots. Die Ausgabe für die Bambini erfolgt am 3. August im Vereinsheim, weitere Termine folgen.',
+  },
+  {
+    id: 'n3',
+    title: 'Einladung zum Sommerfest am 9. August',
+    date: '2026-07-20',
+    tag: 'Veranstaltung',
+    summary: 'Traditionelles Sommerfest mit Live-Musik, Grill und Kinderprogramm.',
+    content:
+      'Am 9. August laden wir alle Mitglieder, Spieler, Fans und Familien herzlich zu unserem Sommerfest auf dem Vereinsgelände ein. Ab 14 Uhr erwartet euch ein buntes Programm mit Grillstand, Getränken, Live-Musik und einem Kinderprogramm. Der Eintritt ist frei.',
+  },
+  {
+    id: 'n4',
+    title: 'Neuer Sponsor an Bord',
+    date: '2026-07-15',
+    tag: 'Verein',
+    summary: 'Autohaus Demir wird neuer Trikotsponsor der 1. Mannschaft.',
+    content:
+      'Wir freuen uns, das Autohaus Demir als neuen Hauptsponsor der 1. Mannschaft begrüßen zu dürfen. Die Zusammenarbeit ist zunächst auf drei Jahre angelegt und stärkt die finanzielle Basis des Vereins nachhaltig.',
+  },
+];
+
+export const RESULTS: MatchResult[] = [
+  {
+    id: 'r1',
+    date: '2026-07-19',
+    competition: 'Testspiel',
+    teamId: 'herren1',
+    homeTeam: 'FC Türk Hof',
+    awayTeam: 'SpVgg Rehau',
+    homeScore: 3,
+    awayScore: 1,
+    isHome: true,
+  },
+  {
+    id: 'r2',
+    date: '2026-07-12',
+    competition: 'Testspiel',
+    teamId: 'herren1',
+    homeTeam: 'TSV Münchberg',
+    awayTeam: 'FC Türk Hof',
+    homeScore: 2,
+    awayScore: 2,
+    isHome: false,
+  },
+  {
+    id: 'r3',
+    date: '2026-05-24',
+    competition: 'Kreisliga, 30. Spieltag',
+    teamId: 'herren1',
+    homeTeam: 'FC Türk Hof',
+    awayTeam: 'SV Konradsreuth',
+    homeScore: 4,
+    awayScore: 0,
+    isHome: true,
+  },
+  {
+    id: 'r4',
+    date: '2026-05-17',
+    competition: 'Kreisliga, 29. Spieltag',
+    teamId: 'herren1',
+    homeTeam: 'FC Schwarzenbach',
+    awayTeam: 'FC Türk Hof',
+    homeScore: 1,
+    awayScore: 1,
+    isHome: false,
+  },
+  {
+    id: 'r5',
+    date: '2026-07-18',
+    competition: 'Testspiel',
+    teamId: 'u19',
+    homeTeam: 'FC Türk Hof U19',
+    awayTeam: 'SC Selb U19',
+    homeScore: 2,
+    awayScore: 0,
+    isHome: true,
+  },
+  {
+    id: 'r6',
+    date: '2026-07-11',
+    competition: 'Testspiel',
+    teamId: 'u15',
+    homeTeam: 'DJK Naila',
+    awayTeam: 'FC Türk Hof U15',
+    homeScore: 0,
+    awayScore: 3,
+    isHome: false,
+  },
+];
+
+export const TABLE_HERREN1: TableRow[] = [
+  { position: 1, club: 'SV Konradsreuth', played: 30, won: 22, drawn: 5, lost: 3, goalsFor: 78, goalsAgainst: 28, points: 71 },
+  { position: 2, club: 'FC Türk Hof', played: 30, won: 20, drawn: 6, lost: 4, goalsFor: 71, goalsAgainst: 33, points: 66, isOwnTeam: true },
+  { position: 3, club: 'FC Schwarzenbach', played: 30, won: 18, drawn: 7, lost: 5, goalsFor: 65, goalsAgainst: 37, points: 61 },
+  { position: 4, club: 'TSV Münchberg', played: 30, won: 16, drawn: 8, lost: 6, goalsFor: 58, goalsAgainst: 40, points: 56 },
+  { position: 5, club: 'SpVgg Rehau', played: 30, won: 14, drawn: 6, lost: 10, goalsFor: 52, goalsAgainst: 44, points: 48 },
+  { position: 6, club: 'DJK Naila', played: 30, won: 11, drawn: 9, lost: 10, goalsFor: 46, goalsAgainst: 47, points: 42 },
+  { position: 7, club: 'SC Selb', played: 30, won: 10, drawn: 7, lost: 13, goalsFor: 41, goalsAgainst: 50, points: 37 },
+  { position: 8, club: 'TSV Hof', played: 30, won: 8, drawn: 8, lost: 14, goalsFor: 38, goalsAgainst: 55, points: 32 },
+  { position: 9, club: 'SV Oberkotzau', played: 30, won: 6, drawn: 5, lost: 19, goalsFor: 30, goalsAgainst: 68, points: 23 },
+  { position: 10, club: 'FC Helmbrechts', played: 30, won: 3, drawn: 4, lost: 23, goalsFor: 24, goalsAgainst: 81, points: 13 },
+];
+
+export const PLAYERS: Player[] = [
+  { id: 'p1', name: 'Emre Kaya', number: 1, position: 'Torwart', teamId: 'herren1', birthYear: 1998, initials: 'EK', stats: { games: 28, goals: 0, assists: 0 } },
+  { id: 'p2', name: 'Cem Yildiz', number: 4, position: 'Innenverteidiger', teamId: 'herren1', birthYear: 1995, initials: 'CY', stats: { games: 29, goals: 2, assists: 1 } },
+  { id: 'p3', name: 'Deniz Aydin', number: 6, position: 'Defensives Mittelfeld', teamId: 'herren1', birthYear: 1997, initials: 'DA', stats: { games: 27, goals: 3, assists: 6 } },
+  { id: 'p4', name: 'Mert Sahin', number: 9, position: 'Stürmer', teamId: 'herren1', birthYear: 1999, initials: 'MS', stats: { games: 28, goals: 19, assists: 5 } },
+  { id: 'p5', name: 'Baris Demir', number: 10, position: 'Offensives Mittelfeld', teamId: 'herren1', birthYear: 1996, initials: 'BD', stats: { games: 30, goals: 12, assists: 11 } },
+  { id: 'p6', name: 'Kaan Öztürk', number: 3, position: 'Linksverteidiger', teamId: 'herren1', birthYear: 2001, initials: 'KÖ', stats: { games: 26, goals: 1, assists: 4 } },
+  { id: 'p7', name: 'Yusuf Celik', number: 7, position: 'Rechtsaußen', teamId: 'herren1', birthYear: 2000, initials: 'YC', stats: { games: 25, goals: 8, assists: 7 } },
+  { id: 'p8', name: 'Ali Yavuz', number: 11, position: 'Stürmer', teamId: 'u19', birthYear: 2008, initials: 'AY', stats: { games: 18, goals: 14, assists: 3 } },
+  { id: 'p9', name: 'Serkan Aksoy', number: 8, position: 'Mittelfeld', teamId: 'u19', birthYear: 2008, initials: 'SA', stats: { games: 17, goals: 5, assists: 8 } },
+  { id: 'p10', name: 'Enes Polat', number: 5, position: 'Abwehr', teamId: 'u17', birthYear: 2010, initials: 'EP', stats: { games: 15, goals: 1, assists: 2 } },
+  { id: 'p11', name: 'Timur Aslan', number: 9, position: 'Stürmer', teamId: 'u15', birthYear: 2012, initials: 'TA', stats: { games: 14, goals: 11, assists: 4 } },
+];
+
+export const FORMS: FormTemplate[] = [
+  {
+    id: 'f1',
+    title: 'Trainingsabmeldung',
+    description: 'Melde dich für ein Training oder Spiel ab, damit die Trainer planen können.',
+    targetRoles: ['spieler'],
+    fields: [
+      { id: 'name', label: 'Name', type: 'text', required: true },
+      { id: 'termin', label: 'Betroffener Termin', type: 'text', required: true },
+      { id: 'grund', label: 'Grund', type: 'select', options: ['Krankheit', 'Verletzung', 'Beruflich', 'Urlaub', 'Sonstiges'], required: true },
+      { id: 'anmerkung', label: 'Anmerkung', type: 'textarea' },
+    ],
+  },
+  {
+    id: 'f2',
+    title: 'Mitgliedsantrag',
+    description: 'Werde Mitglied im FC Türk Hof. Wir melden uns nach Eingang bei dir.',
+    targetRoles: ['fan', 'spieler', 'funktionaer'],
+    fields: [
+      { id: 'name', label: 'Vor- und Nachname', type: 'text', required: true },
+      { id: 'geburtsdatum', label: 'Geburtsdatum', type: 'date', required: true },
+      { id: 'abteilung', label: 'Gewünschte Abteilung', type: 'select', options: ['Herrenmannschaft', 'Jugend', 'Fördermitglied', 'Passiv'], required: true },
+      { id: 'nachricht', label: 'Nachricht an den Vorstand', type: 'textarea' },
+    ],
+  },
+  {
+    id: 'f3',
+    title: 'Helfer beim Sommerfest',
+    description: 'Trage dich als Helfer für unser Sommerfest am 9. August ein.',
+    targetRoles: ['fan', 'spieler', 'funktionaer'],
+    fields: [
+      { id: 'name', label: 'Name', type: 'text', required: true },
+      { id: 'schicht', label: 'Wunschschicht', type: 'select', options: ['Aufbau (10-14 Uhr)', 'Grillstand (14-18 Uhr)', 'Theke (18-22 Uhr)', 'Abbau (22-23 Uhr)'], required: true },
+      { id: 'telefon', label: 'Telefonnummer', type: 'text' },
+      { id: 'zusage', label: 'Ich bin verbindlich dabei', type: 'checkbox', required: true },
+    ],
+  },
+  {
+    id: 'f4',
+    title: 'Schiedsrichter-Ansetzung bestätigen',
+    description: 'Bestätige oder storniere deine Ansetzung als Schiedsrichter/Helfer.',
+    targetRoles: ['funktionaer'],
+    fields: [
+      { id: 'name', label: 'Name', type: 'text', required: true },
+      { id: 'spiel', label: 'Spiel', type: 'text', required: true },
+      { id: 'status', label: 'Status', type: 'select', options: ['Bestätigt', 'Storniert'], required: true },
+      { id: 'anmerkung', label: 'Anmerkung', type: 'textarea' },
+    ],
+  },
+];
+
+export const SURVEYS: Survey[] = [
+  {
+    id: 's1',
+    title: 'Fahrgemeinschaften Auswärtsspiele U15',
+    description: 'Damit die Fahrten zu Auswärtsspielen organisiert werden können, bitten wir alle Eltern um eine Rückmeldung zur Mitfahrbereitschaft.',
+    audience: 'eltern_jugend',
+    deadline: '2026-08-05',
+    options: [
+      { id: 'o1', label: 'Ich kann regelmäßig fahren', votes: 6 },
+      { id: 'o2', label: 'Ich kann gelegentlich fahren', votes: 9 },
+      { id: 'o3', label: 'Ich kann derzeit nicht fahren', votes: 3 },
+    ],
+  },
+  {
+    id: 's2',
+    title: 'Zeitpunkt Herbstferien-Trainingslager (Jugend)',
+    description: 'Wann sollen die Jugendabteilungen das Trainingslager in den Herbstferien durchführen?',
+    audience: 'eltern_jugend',
+    deadline: '2026-08-15',
+    options: [
+      { id: 'o1', label: '1. Ferienwoche', votes: 11 },
+      { id: 'o2', label: '2. Ferienwoche', votes: 8 },
+    ],
+  },
+  {
+    id: 's3',
+    title: 'Wunschtermin Teamabend 1. Mannschaft',
+    description: 'An welchem Abend soll der gemeinsame Teamabend vor dem Saisonstart stattfinden?',
+    audience: 'spieler_mannschaft',
+    deadline: '2026-08-01',
+    options: [
+      { id: 'o1', label: 'Montag', votes: 4 },
+      { id: 'o2', label: 'Mittwoch', votes: 10 },
+      { id: 'o3', label: 'Freitag', votes: 7 },
+    ],
+  },
+  {
+    id: 's4',
+    title: 'Neue Trainingszeiten ab September',
+    description: 'Stimmt für euren bevorzugten Trainingsbeginn ab der neuen Saison ab.',
+    audience: 'spieler_mannschaft',
+    deadline: '2026-08-20',
+    options: [
+      { id: 'o1', label: '18:00 Uhr', votes: 9 },
+      { id: 'o2', label: '18:30 Uhr', votes: 13 },
+      { id: 'o3', label: '19:00 Uhr', votes: 5 },
+    ],
+  },
+];
+
+export const CHANNELS: Channel[] = [
+  {
+    id: 'c1',
+    name: '1. Mannschaft',
+    category: 'mannschaft',
+    teamId: 'herren1',
+    description: 'Interner Austausch der 1. Mannschaft.',
+  },
+  {
+    id: 'c2',
+    name: 'Alte Herren',
+    category: 'mannschaft',
+    teamId: 'ah',
+    description: 'Interner Austausch der Alten Herren.',
+  },
+  {
+    id: 'c3',
+    name: 'U19 Jugend',
+    category: 'jugend',
+    teamId: 'u19',
+    description: 'Team- und Elternkommunikation U19.',
+  },
+  {
+    id: 'c4',
+    name: 'U17 Jugend',
+    category: 'jugend',
+    teamId: 'u17',
+    description: 'Team- und Elternkommunikation U17.',
+  },
+  {
+    id: 'c5',
+    name: 'U15 Jugend',
+    category: 'jugend',
+    teamId: 'u15',
+    description: 'Team- und Elternkommunikation U15.',
+  },
+  {
+    id: 'c6',
+    name: 'U13 Jugend',
+    category: 'jugend',
+    teamId: 'u13',
+    description: 'Team- und Elternkommunikation U13.',
+  },
+  {
+    id: 'c7',
+    name: 'Bambini',
+    category: 'jugend',
+    teamId: 'bambini',
+    description: 'Team- und Elternkommunikation Bambini.',
+  },
+  {
+    id: 'c8',
+    name: 'Vorstand & Funktionäre',
+    category: 'funktionaere',
+    description: 'Interner Austausch für Vorstand, Trainer und Betreuer.',
+  },
+];
+
+export const INITIAL_MESSAGES: ChatMessage[] = [
+  {
+    id: 'm1',
+    channelId: 'c1',
+    author: 'Cem Yildiz (Trainer)',
+    role: 'funktionaer',
+    text: 'Denkt bitte alle an das Training heute um 18:30 Uhr, danach kurze Besprechung zum Pokalspiel.',
+    timestamp: '2026-07-29T08:10:00',
+  },
+  {
+    id: 'm2',
+    channelId: 'c1',
+    author: 'Mert Sahin',
+    role: 'spieler',
+    text: 'Bin dabei, bringe die neuen Bälle mit.',
+    timestamp: '2026-07-29T08:32:00',
+  },
+  {
+    id: 'm3',
+    channelId: 'c3',
+    author: 'Trainerteam U19',
+    role: 'funktionaer',
+    text: 'Testspiel am Samstag gegen SC Selb wurde bestätigt. Treffpunkt 9:45 Uhr am Vereinsheim.',
+    timestamp: '2026-07-28T17:00:00',
+  },
+  {
+    id: 'm4',
+    channelId: 'c5',
+    author: 'Jugendleitung',
+    role: 'funktionaer',
+    text: 'Bitte die Umfrage zu den Fahrgemeinschaften bis Mittwoch ausfüllen. Danke euch!',
+    timestamp: '2026-07-27T12:00:00',
+  },
+  {
+    id: 'm5',
+    channelId: 'c8',
+    author: '1. Vorsitzender',
+    role: 'funktionaer',
+    text: 'Nächste Vorstandssitzung morgen 19 Uhr im Vereinsheim, Tagesordnung folgt per Mail.',
+    timestamp: '2026-07-29T09:00:00',
+  },
+];
