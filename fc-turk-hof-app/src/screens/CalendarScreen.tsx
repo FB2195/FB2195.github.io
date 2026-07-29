@@ -6,7 +6,8 @@ import Chip from '../components/Chip';
 import EmptyState from '../components/EmptyState';
 import ScreenContainer from '../components/ScreenContainer';
 import { useAuth } from '../context/AuthContext';
-import { EVENTS, teamName } from '../data/mockData';
+import { useData } from '../context/DataContext';
+import { teamName } from '../data/mockData';
 import { CalendarStackParamList } from '../navigation/types';
 import { colors } from '../theme/colors';
 import { buildMonthGrid, formatDateLong, formatTimeRange, monthLabel, WEEKDAYS_HEADER } from '../utils/date';
@@ -29,6 +30,7 @@ type Props = NativeStackScreenProps<CalendarStackParamList, 'Calendar'>;
 
 const CalendarScreen: React.FC<Props> = ({ navigation }) => {
   const { user, isFunktionaer } = useAuth();
+  const { events } = useData();
   const [year, setYear] = useState(2026);
   const [month, setMonth] = useState(6); // Juli = Index 6
   const [selectedDate, setSelectedDate] = useState(TODAY);
@@ -37,8 +39,8 @@ const CalendarScreen: React.FC<Props> = ({ navigation }) => {
   const relevantTeamId = user?.teamId ?? user?.parentTeamId;
 
   const visibleEvents = useMemo(
-    () => EVENTS.filter((e) => !onlyMine || isFunktionaer || !relevantTeamId || e.teamId === relevantTeamId),
-    [onlyMine, isFunktionaer, relevantTeamId]
+    () => events.filter((e) => !onlyMine || isFunktionaer || !relevantTeamId || e.teamId === relevantTeamId),
+    [events, onlyMine, isFunktionaer, relevantTeamId]
   );
 
   const eventsByDate = useMemo(() => {
@@ -70,7 +72,8 @@ const CalendarScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <ScreenContainer>
+    <View style={{ flex: 1 }}>
+      <ScreenContainer>
       {!isFunktionaer && relevantTeamId ? (
         <View style={styles.filterRow}>
           <Chip label="Meine Mannschaft" selected={onlyMine} onPress={() => setOnlyMine(true)} />
@@ -145,7 +148,14 @@ const CalendarScreen: React.FC<Props> = ({ navigation }) => {
           </TouchableOpacity>
         ))
       )}
-    </ScreenContainer>
+      </ScreenContainer>
+
+      {isFunktionaer && (
+        <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate('EventForm')}>
+          <Text style={styles.fabIcon}>+</Text>
+        </TouchableOpacity>
+      )}
+    </View>
   );
 };
 
@@ -247,6 +257,28 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.textMuted,
     marginTop: 3,
+  },
+  fab: {
+    position: 'absolute',
+    right: 20,
+    bottom: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  fabIcon: {
+    color: colors.white,
+    fontSize: 30,
+    fontWeight: '600',
+    lineHeight: 32,
   },
 });
 

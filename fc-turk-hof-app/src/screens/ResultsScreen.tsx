@@ -4,29 +4,44 @@ import Card from '../components/Card';
 import Chip from '../components/Chip';
 import EmptyState from '../components/EmptyState';
 import ScreenContainer from '../components/ScreenContainer';
-import { RESULTS, TABLE_HERREN1, TEAMS } from '../data/mockData';
+import { useAuth } from '../context/AuthContext';
+import { RESULTS, TABLES, TEAMS, teamName } from '../data/mockData';
 import { colors } from '../theme/colors';
-import { formatDateShort } from '../utils/date';
 import { TeamId } from '../types';
+import { formatDateShort } from '../utils/date';
+import { getResultsScope } from '../utils/permissions';
 
 type Tab = 'ergebnisse' | 'tabelle';
 
-const teamsWithResults = TEAMS.filter((t) => RESULTS.some((r) => r.teamId === t.id));
-
 const ResultsScreen: React.FC = () => {
+  const { user } = useAuth();
+  const scope = getResultsScope(user); // 'all' oder [eigenes Team] für Eltern
+  const isLocked = scope !== 'all';
+  const lockedTeamId = isLocked ? (scope as TeamId[])[0] : undefined;
+
+  const availableTeams = isLocked ? TEAMS.filter((t) => t.id === lockedTeamId) : TEAMS;
+
   const [tab, setTab] = useState<Tab>('ergebnisse');
-  const [teamFilter, setTeamFilter] = useState<TeamId | 'alle'>('alle');
+  const [teamFilter, setTeamFilter] = useState<TeamId | 'alle'>(isLocked ? lockedTeamId! : 'alle');
+  const [tableTeamId, setTableTeamId] = useState<TeamId>(lockedTeamId ?? 'herren1');
 
   const filteredResults = useMemo(
     () =>
       [...RESULTS]
-        .filter((r) => teamFilter === 'alle' || r.teamId === teamFilter)
+        .filter((r) => (isLocked ? r.teamId === lockedTeamId : teamFilter === 'alle' || r.teamId === teamFilter))
         .sort((a, b) => b.date.localeCompare(a.date)),
-    [teamFilter]
+    [teamFilter, isLocked, lockedTeamId]
   );
+
+  const activeTableTeamId = isLocked ? lockedTeamId! : tableTeamId;
+  const activeTable = TABLES[activeTableTeamId] ?? [];
 
   return (
     <ScreenContainer>
+      {isLocked && (
+        <Text style={styles.lockedHint}>Du siehst ausschließlich Ergebnisse und Tabelle von {teamName(lockedTeamId)}.</Text>
+      )}
+
       <View style={styles.segmentRow}>
         <TouchableOpacity
           style={[styles.segment, tab === 'ergebnisse' && styles.segmentActive]}
@@ -44,12 +59,14 @@ const ResultsScreen: React.FC = () => {
 
       {tab === 'ergebnisse' ? (
         <View>
-          <View style={styles.chipRow}>
-            <Chip label="Alle Teams" selected={teamFilter === 'alle'} onPress={() => setTeamFilter('alle')} />
-            {teamsWithResults.map((t) => (
-              <Chip key={t.id} label={t.name} selected={teamFilter === t.id} onPress={() => setTeamFilter(t.id)} />
-            ))}
-          </View>
+          {!isLocked && (
+            <View style={styles.chipRow}>
+              <Chip label="Alle Teams" selected={teamFilter === 'alle'} onPress={() => setTeamFilter('alle')} />
+              {availableTeams.map((t) => (
+                <Chip key={t.id} label={t.name} selected={teamFilter === t.id} onPress={() => setTeamFilter(t.id)} />
+              ))}
+            </View>
+          )}
 
           {filteredResults.length === 0 ? (
             <EmptyState title="Keine Ergebnisse vorhanden" />
@@ -76,33 +93,56 @@ const ResultsScreen: React.FC = () => {
           )}
         </View>
       ) : (
-        <Card style={{ padding: 0 }}>
-          <Text style={styles.tableTitle}>Kreisliga · 1. Mannschaft</Text>
-          <View style={styles.tableHeaderRow}>
-            <Text style={[styles.th, styles.colPos]}>#</Text>
-            <Text style={[styles.th, styles.colClub]}>Verein</Text>
-            <Text style={[styles.th, styles.colNum]}>Sp</Text>
-            <Text style={[styles.th, styles.colNum]}>Tore</Text>
-            <Text style={[styles.th, styles.colNum]}>Pkt</Text>
-          </View>
-          {TABLE_HERREN1.map((row) => (
-            <View key={row.club} style={[styles.tableRow, row.isOwnTeam && styles.tableRowOwn]}>
-              <Text style={[styles.td, styles.colPos]}>{row.position}</Text>
-              <Text style={[styles.td, styles.colClub, row.isOwnTeam && styles.tdOwn]} numberOfLines={1}>
-                {row.club}
-              </Text>
-              <Text style={[styles.td, styles.colNum]}>{row.played}</Text>
-              <Text style={[styles.td, styles.colNum]}>{row.goalsFor}:{row.goalsAgainst}</Text>
-              <Text style={[styles.td, styles.colNum, styles.tdPoints]}>{row.points}</Text>
+        <View>
+          {!isLocked && (
+            <View style={styles.chipRow}>
+              {availableTeams.map((t) => (
+                <Chip key={t.id} label={t.name} selected={tableTeamId === t.id} onPress={() => setTableTeamId(t.id)} />
+              ))}
             </View>
-          ))}
-        </Card>
+          )}
+          <Card style={{ padding: 0 }}>
+            <Text style={styles.tableTitle}>Tabelle · {teamName(activeTableTeamId)}</Text>
+            {activeTable.length === 0 ? (
+              <View style={{ padding: 14 }}>
+                <EmptyState title="Für dieses Team liegt noch keine Tabelle vor" />
+              </View>
+            ) : (
+              <View>
+                <View style={styles.tableHeaderRow}>
+                  <Text style={[styles.th, styles.colPos]}>#</Text>
+                  <Text style={[styles.th, styles.colClub]}>Verein</Text>
+                  <Text style={[styles.th, styles.colNum]}>Sp</Text>
+                  <Text style={[styles.th, styles.colNum]}>Tore</Text>
+                  <Text style={[styles.th, styles.colNum]}>Pkt</Text>
+                </View>
+                {activeTable.map((row) => (
+                  <View key={row.club} style={[styles.tableRow, row.isOwnTeam && styles.tableRowOwn]}>
+                    <Text style={[styles.td, styles.colPos]}>{row.position}</Text>
+                    <Text style={[styles.td, styles.colClub, row.isOwnTeam && styles.tdOwn]} numberOfLines={1}>
+                      {row.club}
+                    </Text>
+                    <Text style={[styles.td, styles.colNum]}>{row.played}</Text>
+                    <Text style={[styles.td, styles.colNum]}>{row.goalsFor}:{row.goalsAgainst}</Text>
+                    <Text style={[styles.td, styles.colNum, styles.tdPoints]}>{row.points}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+          </Card>
+        </View>
       )}
     </ScreenContainer>
   );
 };
 
 const styles = StyleSheet.create({
+  lockedHint: {
+    fontSize: 12,
+    color: colors.textMuted,
+    marginBottom: 12,
+    fontStyle: 'italic',
+  },
   segmentRow: {
     flexDirection: 'row',
     backgroundColor: colors.surface,
@@ -193,7 +233,7 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   tableRowOwn: {
-    backgroundColor: `${colors.primary}10`,
+    backgroundColor: `${colors.primary}18`,
   },
   th: {
     fontSize: 11,

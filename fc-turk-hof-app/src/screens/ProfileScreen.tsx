@@ -1,15 +1,17 @@
-import React from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { Alert, Platform, StyleSheet, Text, View } from 'react-native';
 import Card from '../components/Card';
 import PrimaryButton from '../components/PrimaryButton';
 import RoleBadge from '../components/RoleBadge';
 import ScreenContainer from '../components/ScreenContainer';
 import { useAuth } from '../context/AuthContext';
-import { teamName } from '../data/mockData';
+import { bereichLabel, teamName } from '../data/mockData';
 import { colors } from '../theme/colors';
+import { ensureNotificationPermission, notifyLocal } from '../utils/notifications';
 
 const ProfileScreen: React.FC = () => {
   const { user, logout } = useAuth();
+  const [sendingTest, setSendingTest] = useState(false);
 
   if (!user) return null;
 
@@ -18,6 +20,27 @@ const ProfileScreen: React.FC = () => {
       { text: 'Abbrechen', style: 'cancel' },
       { text: 'Abmelden', style: 'destructive', onPress: () => logout() },
     ]);
+  };
+
+  const handleTestNotification = async () => {
+    if (Platform.OS === 'web') {
+      Alert.alert('Nicht verfügbar', 'Benachrichtigungen funktionieren nur in der mobilen App, nicht im Web.');
+      return;
+    }
+    setSendingTest(true);
+    try {
+      const granted = await ensureNotificationPermission();
+      if (!granted) {
+        Alert.alert(
+          'Keine Berechtigung',
+          'Bitte erlaube Benachrichtigungen für diese App in den Handy-Einstellungen.'
+        );
+        return;
+      }
+      await notifyLocal('FC Türk Hof', `Test-Benachrichtigung für ${user.name}.`);
+    } finally {
+      setSendingTest(false);
+    }
   };
 
   return (
@@ -31,17 +54,41 @@ const ProfileScreen: React.FC = () => {
       </View>
 
       <Card>
-        {user.role === 'spieler' && <Row label="Team" value={teamName(user.teamId)} />}
-        {user.role === 'fan' && (
-          <Row
-            label="Zugehörigkeit"
-            value={user.isParentOfYouth ? `Elternteil · ${teamName(user.parentTeamId)}` : 'Fan / Mitglied'}
-          />
+        {user.role === 'spieler' && <Row label="Team" value={teamName(user.teamId)} last />}
+        {user.role === 'fan' && user.isParentOfYouth && (
+          <>
+            <Row label="Kind" value={user.childName ?? '–'} />
+            <Row label="Team des Kindes" value={teamName(user.parentTeamId)} last />
+          </>
         )}
-        {user.role === 'funktionaer' && <Row label="Bereich" value={user.bereich ?? '–'} last />}
+        {user.role === 'fan' && !user.isParentOfYouth && <Row label="Zugehörigkeit" value="Fan / Mitglied" last />}
+        {user.role === 'funktionaer' && (
+          <>
+            <Row label="Bereich" value={bereichLabel(user.bereich)} last={user.bereich !== 'trainer'} />
+            {user.bereich === 'trainer' && (
+              <Row
+                label="Trainiert"
+                value={(user.coachedTeamIds ?? []).map((id) => teamName(id)).join(', ') || '–'}
+                last
+              />
+            )}
+          </>
+        )}
       </Card>
 
-      <PrimaryButton label="Abmelden" onPress={handleLogout} variant="outline" style={{ marginTop: 24 }} />
+      <PrimaryButton
+        label="Test-Benachrichtigung senden"
+        onPress={handleTestNotification}
+        variant="secondary"
+        loading={sendingTest}
+        style={{ marginTop: 24 }}
+      />
+      <Text style={styles.notificationHint}>
+        Testet nur lokale Benachrichtigungen auf diesem Gerät. Echte Push-Nachrichten zwischen unterschiedlichen
+        Handys erfordern zusätzlich ein Backend.
+      </Text>
+
+      <PrimaryButton label="Abmelden" onPress={handleLogout} variant="outline" style={{ marginTop: 12 }} />
     </ScreenContainer>
   );
 };
@@ -96,6 +143,12 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.text,
     fontWeight: '600',
+  },
+  notificationHint: {
+    fontSize: 11,
+    color: colors.textMuted,
+    marginTop: 8,
+    fontStyle: 'italic',
   },
 });
 

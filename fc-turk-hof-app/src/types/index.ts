@@ -1,13 +1,6 @@
 export type Role = 'spieler' | 'fan' | 'funktionaer';
 
-export type TeamId =
-  | 'herren1'
-  | 'ah'
-  | 'u19'
-  | 'u17'
-  | 'u15'
-  | 'u13'
-  | 'bambini';
+export type TeamId = 'herren1' | 'u11' | 'u9' | 'bambini';
 
 export type TeamCategory = 'senior' | 'jugend';
 
@@ -17,6 +10,16 @@ export interface TeamInfo {
   category: TeamCategory;
 }
 
+export type FunktionaerBereich =
+  | 'trainer'
+  | 'jugendleiter'
+  | 'vorstand1'
+  | 'vorstand2'
+  | 'kassier'
+  | 'presse'
+  | 'schriftfuehrer'
+  | 'sonstiges';
+
 export interface AppUser {
   id: string;
   name: string;
@@ -25,10 +28,14 @@ export interface AppUser {
   teamId?: TeamId;
   /** Fan: ist Erziehungsberechtigte/r eines Jugendspielers */
   isParentOfYouth?: boolean;
+  /** Fan (Elternteil): Name des Kindes */
+  childName?: string;
   /** Fan (Elternteil): Jugendteam des Kindes */
   parentTeamId?: TeamId;
   /** Funktionär: Zuständigkeitsbereich */
-  bereich?: string;
+  bereich?: FunktionaerBereich;
+  /** Funktionär mit Bereich "trainer": trainierte Teams */
+  coachedTeamIds?: TeamId[];
   avatarInitials: string;
 }
 

@@ -1,54 +1,91 @@
 # FC Türk Hof – Vereins-App
 
 Eine React-Native-App (Expo, TypeScript) für den FC Türk Hof mit Rollen-Login, Terminkalender,
-News, Ergebnissen/Tabellen, Spielerprofilen, ausfüllbaren Formularen, getrennten Umfragen sowie
-nach Mannschaft/Jugend/Funktionären getrennter Team-Kommunikation.
+News, Ergebnissen/Tabellen, Spielerprofilen, ausfüllbaren Formularen, streng getrennten Umfragen
+sowie fein nach Team/Bereich getrennter Kommunikation.
+
+## Teams
+
+Herrenmannschaft, U11, U9, Bambini.
+
+## Rollen & Zugriffsrechte
+
+Beim Login (Demo, kein Passwort) wählt man eine Rolle und passende Zusatzangaben:
+
+- **Spieler** – wählt sein Team. Sieht ausschließlich den Chat-Kanal des eigenen Teams.
+- **Fan** – optional als *Elternteil eines Jugendspielers* mit Name des Kindes + Jugendteam.
+  Eltern sehen **nur** Ergebnisse/Tabelle sowie den Chat-Kanal des Teams ihres Kindes.
+- **Funktionär** – wählt einen Zuständigkeitsbereich:
+  - **Trainer** – wählt die trainierte(n) Mannschaft(en) und erhält Schreibzugriff auf genau
+    deren Chat-Kanäle (+ interner Funktionäre-Kanal).
+  - **Jugendleiter** – sieht/schreibt in alle Jugend-Kanäle (+ Funktionäre-Kanal).
+  - **1./2. Vorstand, Kassier, Presse/Öffentlichkeitsarbeit, Schriftführer, Sonstige** –
+    sehen alle Tabellen/Ergebnisse, aber **keine** Mannschafts-Chats, nur den internen
+    Funktionäre-Kanal.
+- **News und Kalender** sind für alle Rollen uneingeschränkt sichtbar. Funktionäre können im
+  Kalender neue Termine anlegen und bestehende löschen (Button „+“ bzw. „Termin löschen“).
+
+Die komplette Zugriffslogik für Chat-Kanäle und Ergebnis-Sichtbarkeit ist zentral in
+`src/utils/permissions.ts` gebündelt.
 
 ## Features
 
-- **Rollen-Login** (kein Passwort, Demo-Modus): Spieler, Fan, Funktionär. Je nach Rolle werden
-  zusätzliche Angaben abgefragt (Spieler → Mannschaft, Fan → optional Elternteil eines
-  Jugendspielers, Funktionär → Zuständigkeitsbereich). Die Anmeldung wird lokal per
-  `AsyncStorage` gespeichert.
-- **Terminkalender**: Monatsansicht mit Markierungen für Trainings/Spiele/Sonstiges, Filter
-  "Meine Mannschaft" vs. "Alle Termine", Termin-Detailansicht.
-- **News/Ankündigungen**: Liste + Detailansicht.
-- **Ergebnisse/Tabellen**: Ergebnisse mit Team-Filter, separate Tabellenansicht (Kreisliga).
-- **Spielerprofile**: Kaderliste je Team, Profil mit Statistiken (Spiele/Tore/Vorlagen).
-- **Ausfüllbare Formulare**: Dynamisch gerenderte Formulare (Text, Textarea, Auswahl, Checkbox,
-  Datum) je nach Zielrolle, inkl. lokaler Speicherung der Einreichungen.
-- **Umfragen, getrennt nach Zielgruppe**: Umfragen für *Eltern der Jugendspieler* und für
-  *Spieler der 1. Mannschaft* sind strikt getrennt – jede Zielgruppe sieht und beantwortet nur
-  ihre eigenen Umfragen; Funktionäre sehen beide Bereiche.
-- **Team-Kommunikation**: Kanäle getrennt nach *Mannschaft* (Senioren), *Jugendmannschaften*
-  (je Team) und *Funktionäre*. Zugriff ist rollen- und teamabhängig (Spieler sehen ihren
-  eigenen Kanal, Eltern den Kanal des Jugendteams ihres Kindes, Funktionäre alle Kanäle).
+- **Rollen-Login** mit lokaler Persistenz per `AsyncStorage`.
+- **Terminkalender**: Monatsansicht, Filter „Meine Mannschaft“/„Alle Termine“, Termine anlegen
+  und löschen (nur Funktionäre), Detailansicht.
+- **News/Ankündigungen**: Liste + Detailansicht, für alle sichtbar.
+- **Ergebnisse/Tabellen**: pro Team, für Eltern automatisch auf das Team ihres Kindes begrenzt.
+- **Spielerprofile**: Kaderliste je Team mit Statistiken.
+- **Ausfüllbare Formulare**: dynamisch je nach Zielrolle, inkl. lokaler Speicherung.
+- **Umfragen, getrennt nach Zielgruppe**: *Eltern der Jugendspieler* und *Spieler der
+  Herrenmannschaft* sehen und beantworten ausschließlich ihre eigenen Umfragen.
+- **Team-Kommunikation**: Kanäle je Team + interner Funktionäre-Kanal, Zugriff exakt wie oben
+  beschrieben geregelt.
+- **Lokale Benachrichtigungen**: Berechtigungsabfrage beim Login, Test-Button im Profil, sowie
+  automatische Benachrichtigung beim Anlegen eines neuen Termins. **Wichtig:** Das sind reine
+  On-Device-Benachrichtigungen. Echte Push-Nachrichten zwischen verschiedenen Handys (z. B. „neue
+  Chat-Nachricht von einem Mitspieler“) erfordern zusätzlich ein Backend, siehe unten.
+
+## ⚠️ Wichtige Einschränkung: kein Backend
+
+Alle Daten (Chat-Nachrichten, Formular-Einreichungen, Umfrage-Stimmen, neu angelegte Termine)
+werden ausschließlich **lokal auf dem jeweiligen Gerät** in `AsyncStorage` gespeichert. Zwei
+Personen, die die App auf unterschiedlichen Handys installieren, sehen die Nachrichten der
+jeweils anderen Person **nicht** – die Team-Kommunikation ist aktuell nur eine funktionale
+Oberfläche ohne echten Datenaustausch zwischen Geräten. Für eine produktive Nutzung mit mehreren
+Personen wird ein Backend benötigt (z. B. Supabase oder Firebase) für:
+
+- zentrale Speicherung von Nachrichten, Formularen, Umfragen und Terminen
+- echte Push-Benachrichtigungen zwischen Geräten (in Expo Go seit SDK 53 ohnehin nicht mehr
+  möglich – dafür ist ein eigener Development-/Production-Build nötig)
+- echte Authentifizierung statt Demo-Login
 
 ## Tech-Stack
 
-- [Expo](https://expo.dev) SDK 57 (React Native 0.86, React 19)
+- [Expo](https://expo.dev) SDK 54 (React Native 0.81, React 19.1) — bewusst auf SDK 54 statt der
+  neuesten Version gepinnt, damit die App in der aktuellen Expo-Go-App aus dem App Store/Play
+  Store lauffähig bleibt.
 - TypeScript (strict mode)
 - [React Navigation](https://reactnavigation.org) (Bottom Tabs + Native Stack)
-- `@react-native-async-storage/async-storage` für lokale Persistenz (Login, Formular­einreichungen,
-  Umfrage-Stimmen, Chat-Nachrichten)
+- `@react-native-async-storage/async-storage` für lokale Persistenz
+- `expo-notifications` für lokale Benachrichtigungen
 
-Alle Inhalte (Termine, News, Ergebnisse, Tabelle, Spieler, Formulare, Umfragen, Kanäle) liegen
-aktuell als Mock-Daten in `src/data/mockData.ts` und lassen sich später leicht durch eine
-Backend-Anbindung (REST/GraphQL) ersetzen, da UI und Datenmodell (`src/types`) bereits sauber
-getrennt sind.
+Alle Inhalte (Termine, News, Ergebnisse, Tabellen, Spieler, Formulare, Umfragen, Kanäle) liegen
+als Mock-Daten in `src/data/mockData.ts` und lassen sich später durch eine Backend-Anbindung
+ersetzen, da UI und Datenmodell (`src/types`) sauber getrennt sind.
 
 ## Projektstruktur
 
 ```
 src/
   components/     Wiederverwendbare UI-Bausteine (Card, Chip, PrimaryButton, ...)
-  context/        AuthContext (Login/Rollen) und DataContext (Formulare, Umfragen, Chat)
+  context/        AuthContext (Login/Rollen) und DataContext (Termine, Formulare, Umfragen, Chat)
   data/           Mock-Daten für den FC Türk Hof
   navigation/     Root-, Tab- und Stack-Navigation inkl. Typen
   screens/        Alle App-Screens
-  theme/          Farben
+  theme/          Farben (Weinrot/Weiß)
   types/          Zentrale TypeScript-Typen
-  utils/          Datumshilfsfunktionen (Kalender-Grid, Formatierung)
+  utils/          Datumshilfen, Zugriffslogik (permissions.ts), Benachrichtigungen
 ```
 
 ## Setup & Start
@@ -62,20 +99,11 @@ npx expo start
 Danach in der Expo-CLI `i` (iOS-Simulator), `a` (Android-Emulator) oder `w` (Web) drücken, oder
 den QR-Code mit der Expo-Go-App scannen.
 
-## Rollen zum Ausprobieren
-
-Beim Login gibt es keine echten Zugangsdaten – wähle einfach Namen und Rolle:
-
-- **Spieler** → Team wählen (z. B. "1. Mannschaft (Herren)" für Umfragen/Kommunikation der
-  1. Mannschaft, oder ein Jugendteam).
-- **Fan** → Häkchen "Ich bin Elternteil eines Jugendspielers" setzen und Jugendteam wählen, um
-  Zugriff auf Eltern-Umfragen und den Jugend-Kanal zu erhalten.
-- **Funktionär** → Zuständigkeitsbereich wählen; Funktionäre sehen alle Kommunikationskanäle
-  und beide Umfragen-Bereiche.
-
 ## Nächste Schritte (für eine Produktivversion)
 
-- Mock-Daten durch echtes Backend/CMS ersetzen (z. B. Supabase, Firebase oder eigenes API).
+- Backend anbinden (siehe Einschränkung oben) – Voraussetzung für echte Team-Kommunikation und
+  Push-Benachrichtigungen zwischen Geräten.
 - Echte Authentifizierung (Passwort/SSO) statt Demo-Login.
-- Push-Benachrichtigungen für News, Termine und neue Chat-Nachrichten.
 - Bildupload für Spielerprofile und News-Beiträge.
+- Verteilung an Tester ohne Expo Go: Web-Deployment (sofort möglich) oder EAS Build für eine
+  installierbare Android-APK / iOS-TestFlight-Build.

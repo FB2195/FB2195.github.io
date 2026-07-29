@@ -3,18 +3,21 @@ import { KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableO
 import Chip from '../components/Chip';
 import PrimaryButton from '../components/PrimaryButton';
 import ScreenContainer from '../components/ScreenContainer';
-import { SENIOR_TEAMS, YOUTH_TEAMS } from '../data/mockData';
+import { BEREICH_LABELS, SENIOR_TEAMS, TEAMS, YOUTH_TEAMS } from '../data/mockData';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../theme/colors';
-import { Role, TeamId } from '../types';
+import { FunktionaerBereich, Role, TeamId } from '../types';
 
 const ROLES: { id: Role; label: string; hint: string }[] = [
   { id: 'spieler', label: 'Spieler', hint: 'Aktiver Spieler einer Mannschaft' },
   { id: 'fan', label: 'Fan', hint: 'Unterstützer, Mitglied oder Elternteil' },
-  { id: 'funktionaer', label: 'Funktionär', hint: 'Vorstand, Trainer oder Betreuer' },
+  { id: 'funktionaer', label: 'Funktionär', hint: 'Trainer, Vorstand oder Betreuer' },
 ];
 
-const BEREICHE = ['Vorstand', 'Trainerteam', 'Jugendleitung', 'Schiedsrichter / Helfer'];
+const BEREICHE = (Object.keys(BEREICH_LABELS) as FunktionaerBereich[]).map((id) => ({
+  id,
+  label: BEREICH_LABELS[id],
+}));
 
 const LoginScreen: React.FC = () => {
   const { login } = useAuth();
@@ -22,16 +25,24 @@ const LoginScreen: React.FC = () => {
   const [role, setRole] = useState<Role>('spieler');
   const [teamId, setTeamId] = useState<TeamId | undefined>(undefined);
   const [isParentOfYouth, setIsParentOfYouth] = useState(false);
+  const [childName, setChildName] = useState('');
   const [parentTeamId, setParentTeamId] = useState<TeamId | undefined>(undefined);
-  const [bereich, setBereich] = useState<string | undefined>(undefined);
+  const [bereich, setBereich] = useState<FunktionaerBereich | undefined>(undefined);
+  const [coachedTeamIds, setCoachedTeamIds] = useState<TeamId[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
   const trimmedName = name.trim();
+  const trimmedChildName = childName.trim();
+
   const canSubmit =
     trimmedName.length > 1 &&
     (role !== 'spieler' || !!teamId) &&
-    (role !== 'funktionaer' || !!bereich) &&
-    (role !== 'fan' || !isParentOfYouth || !!parentTeamId);
+    (role !== 'fan' || !isParentOfYouth || (trimmedChildName.length > 1 && !!parentTeamId)) &&
+    (role !== 'funktionaer' || (!!bereich && (bereich !== 'trainer' || coachedTeamIds.length > 0)));
+
+  const toggleCoachedTeam = (id: TeamId) => {
+    setCoachedTeamIds((prev) => (prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]));
+  };
 
   const handleSubmit = async () => {
     if (!canSubmit) return;
@@ -42,8 +53,10 @@ const LoginScreen: React.FC = () => {
         role,
         teamId: role === 'spieler' ? teamId : undefined,
         isParentOfYouth: role === 'fan' ? isParentOfYouth : undefined,
+        childName: role === 'fan' && isParentOfYouth ? trimmedChildName : undefined,
         parentTeamId: role === 'fan' && isParentOfYouth ? parentTeamId : undefined,
         bereich: role === 'funktionaer' ? bereich : undefined,
+        coachedTeamIds: role === 'funktionaer' && bereich === 'trainer' ? coachedTeamIds : undefined,
       });
     } finally {
       setSubmitting(false);
@@ -113,6 +126,15 @@ const LoginScreen: React.FC = () => {
             </TouchableOpacity>
             {isParentOfYouth && (
               <View>
+                <Text style={styles.label}>Name des Kindes</Text>
+                <TextInput
+                  value={childName}
+                  onChangeText={setChildName}
+                  placeholder="Vor- und Nachname des Kindes"
+                  placeholderTextColor={colors.textMuted}
+                  style={styles.input}
+                  autoCapitalize="words"
+                />
                 <Text style={styles.label}>Jugendteam meines Kindes</Text>
                 <View style={styles.chipRow}>
                   {YOUTH_TEAMS.map((t) => (
@@ -124,6 +146,9 @@ const LoginScreen: React.FC = () => {
                     />
                   ))}
                 </View>
+                <Text style={styles.hint}>
+                  Damit siehst du ausschließlich Termine, Ergebnisse, Tabelle und Kanal des Teams deines Kindes.
+                </Text>
               </View>
             )}
           </View>
@@ -134,9 +159,25 @@ const LoginScreen: React.FC = () => {
             <Text style={styles.label}>Zuständigkeitsbereich</Text>
             <View style={styles.chipRow}>
               {BEREICHE.map((b) => (
-                <Chip key={b} label={b} selected={bereich === b} onPress={() => setBereich(b)} />
+                <Chip key={b.id} label={b.label} selected={bereich === b.id} onPress={() => setBereich(b.id)} />
               ))}
             </View>
+            {bereich === 'trainer' && (
+              <View>
+                <Text style={styles.label}>Welche Mannschaft(en) trainierst du?</Text>
+                <View style={styles.chipRow}>
+                  {TEAMS.map((t) => (
+                    <Chip
+                      key={t.id}
+                      label={t.name}
+                      selected={coachedTeamIds.includes(t.id)}
+                      onPress={() => toggleCoachedTeam(t.id)}
+                    />
+                  ))}
+                </View>
+                <Text style={styles.hint}>Mehrfachauswahl möglich. Du erhältst Schreibzugriff auf diese Team-Kanäle.</Text>
+              </View>
+            )}
           </View>
         )}
 
@@ -223,7 +264,7 @@ const styles = StyleSheet.create({
   },
   roleCardActive: {
     borderColor: colors.primary,
-    backgroundColor: `${colors.primary}12`,
+    backgroundColor: `${colors.primary}33`,
   },
   roleLabel: {
     fontSize: 14,
@@ -239,7 +280,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   roleHintActive: {
-    color: colors.primaryDark,
+    color: colors.text,
   },
   chipRow: {
     flexDirection: 'row',
@@ -273,6 +314,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.text,
     flexShrink: 1,
+  },
+  hint: {
+    fontSize: 11,
+    color: colors.textMuted,
+    marginTop: 4,
+    fontStyle: 'italic',
   },
   disclaimer: {
     fontSize: 11,

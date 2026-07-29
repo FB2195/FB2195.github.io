@@ -6,7 +6,8 @@ import RoleBadge from '../components/RoleBadge';
 import ScreenContainer from '../components/ScreenContainer';
 import SectionHeader from '../components/SectionHeader';
 import { useAuth } from '../context/AuthContext';
-import { EVENTS, NEWS, teamName } from '../data/mockData';
+import { useData } from '../context/DataContext';
+import { NEWS, bereichLabel, teamName } from '../data/mockData';
 import { colors } from '../theme/colors';
 import { formatDateLong, formatTimeRange } from '../utils/date';
 
@@ -24,10 +25,12 @@ const QUICK_LINKS: { label: string; icon: string; tab: string; screen?: string }
 
 const HomeScreen: React.FC = () => {
   const { user, isYouthParent, isFunktionaer } = useAuth();
+  const { events } = useData();
   const navigation = useNavigation<any>();
 
   const relevantTeamId = user?.teamId ?? user?.parentTeamId;
-  const upcomingEvents = EVENTS.filter((e) => e.date >= TODAY)
+  const upcomingEvents = events
+    .filter((e) => e.date >= TODAY)
     .filter((e) => isFunktionaer || !relevantTeamId || e.teamId === relevantTeamId)
     .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))
     .slice(0, 3);
@@ -46,7 +49,7 @@ const HomeScreen: React.FC = () => {
           <Text style={styles.subGreeting}>
             {user?.role === 'spieler' && teamName(user.teamId)}
             {user?.role === 'fan' && (isYouthParent ? `Elternteil · ${teamName(user?.parentTeamId)}` : 'Fan & Mitglied')}
-            {user?.role === 'funktionaer' && user.bereich}
+            {user?.role === 'funktionaer' && bereichLabel(user.bereich)}
           </Text>
         </View>
         {user ? <RoleBadge role={user.role} /> : null}

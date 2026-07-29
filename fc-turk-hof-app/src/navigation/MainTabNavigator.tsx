@@ -6,6 +6,7 @@ import CalendarScreen from '../screens/CalendarScreen';
 import ChannelScreen from '../screens/ChannelScreen';
 import CommunicationScreen from '../screens/CommunicationScreen';
 import EventDetailScreen from '../screens/EventDetailScreen';
+import EventFormScreen from '../screens/EventFormScreen';
 import FormDetailScreen from '../screens/FormDetailScreen';
 import FormsScreen from '../screens/FormsScreen';
 import HomeScreen from '../screens/HomeScreen';
@@ -37,7 +38,7 @@ const MoreStack = createNativeStackNavigator<MoreStackParamList>();
 const headerOptions = {
   headerStyle: { backgroundColor: colors.surface },
   headerTitleStyle: { color: colors.text, fontWeight: '700' as const },
-  headerTintColor: colors.primary,
+  headerTintColor: colors.white,
 };
 
 const HomeStackNavigator = () => (
@@ -50,6 +51,7 @@ const CalendarStackNavigator = () => (
   <CalendarStack.Navigator screenOptions={headerOptions}>
     <CalendarStack.Screen name="Calendar" component={CalendarScreen} options={{ title: 'Terminkalender' }} />
     <CalendarStack.Screen name="EventDetail" component={EventDetailScreen} options={{ title: 'Termin' }} />
+    <CalendarStack.Screen name="EventForm" component={EventFormScreen} options={{ title: 'Neuer Termin' }} />
   </CalendarStack.Navigator>
 );
 
@@ -96,8 +98,9 @@ const MainTabNavigator: React.FC = () => (
   <Tab.Navigator
     screenOptions={({ route }) => ({
       headerShown: false,
-      tabBarActiveTintColor: colors.primary,
+      tabBarActiveTintColor: colors.white,
       tabBarInactiveTintColor: colors.textMuted,
+      tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
       tabBarIcon: ({ focused }) => <TabIcon icon={ICONS[route.name as keyof MainTabParamList]} focused={focused} />,
     })}
   >

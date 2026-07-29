@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { AppUser, Role, TeamId } from '../types';
+import { AppUser, FunktionaerBereich, Role, TeamId } from '../types';
+import { ensureNotificationPermission } from '../utils/notifications';
 
 const STORAGE_KEY = '@fctuerkhof/user';
 
@@ -9,8 +10,10 @@ export interface LoginInput {
   role: Role;
   teamId?: TeamId;
   isParentOfYouth?: boolean;
+  childName?: string;
   parentTeamId?: TeamId;
-  bereich?: string;
+  bereich?: FunktionaerBereich;
+  coachedTeamIds?: TeamId[];
 }
 
 interface AuthContextValue {
@@ -22,6 +25,8 @@ interface AuthContextValue {
   isYouthPlayer: boolean;
   isYouthParent: boolean;
   isFunktionaer: boolean;
+  isTrainer: boolean;
+  isJugendleiter: boolean;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -58,12 +63,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       role: input.role,
       teamId: input.teamId,
       isParentOfYouth: input.isParentOfYouth,
+      childName: input.childName,
       parentTeamId: input.parentTeamId,
       bereich: input.bereich,
+      coachedTeamIds: input.coachedTeamIds,
       avatarInitials: initials(input.name),
     };
     setUser(newUser);
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newUser));
+    // Berechtigung für lokale Benachrichtigungen auf diesem Gerät anfragen.
+    ensureNotificationPermission();
   };
 
   const logout = async () => {
@@ -73,11 +82,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const value = useMemo<AuthContextValue>(() => {
     const isSeniorPlayer = user?.role === 'spieler' && user.teamId === 'herren1';
-    const isYouthPlayer =
-      user?.role === 'spieler' && !!user.teamId && user.teamId !== 'herren1' && user.teamId !== 'ah';
+    const isYouthPlayer = user?.role === 'spieler' && !!user.teamId && user.teamId !== 'herren1';
     const isYouthParent = user?.role === 'fan' && !!user.isParentOfYouth;
     const isFunktionaer = user?.role === 'funktionaer';
-    return { user, isReady, login, logout, isSeniorPlayer, isYouthPlayer, isYouthParent, isFunktionaer };
+    const isTrainer = isFunktionaer && user?.bereich === 'trainer';
+    const isJugendleiter = isFunktionaer && user?.bereich === 'jugendleiter';
+    return {
+      user,
+      isReady,
+      login,
+      logout,
+      isSeniorPlayer,
+      isYouthPlayer,
+      isYouthParent,
+      isFunktionaer,
+      isTrainer,
+      isJugendleiter,
+    };
   }, [user, isReady]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

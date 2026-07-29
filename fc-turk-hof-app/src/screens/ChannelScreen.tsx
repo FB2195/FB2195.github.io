@@ -16,6 +16,7 @@ import { CHANNELS } from '../data/mockData';
 import { MoreStackParamList } from '../navigation/types';
 import { colors } from '../theme/colors';
 import { ChatMessage } from '../types';
+import { canAccessChannel } from '../utils/permissions';
 
 type Props = NativeStackScreenProps<MoreStackParamList, 'Channel'>;
 
@@ -34,10 +35,10 @@ const ChannelScreen: React.FC<Props> = ({ route, navigation }) => {
     if (channel) navigation.setOptions({ title: channel.name });
   }, [channel, navigation]);
 
-  if (!channel || !user) {
+  if (!channel || !user || !canAccessChannel(user, channel.id)) {
     return (
-      <View style={styles.container}>
-        <Text>Kanal nicht gefunden.</Text>
+      <View style={[styles.container, styles.centered]}>
+        <Text style={styles.deniedText}>Kein Zugriff auf diesen Kanal.</Text>
       </View>
     );
   }
@@ -98,6 +99,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  centered: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  deniedText: {
+    color: colors.textMuted,
+    fontSize: 14,
   },
   list: {
     padding: 16,

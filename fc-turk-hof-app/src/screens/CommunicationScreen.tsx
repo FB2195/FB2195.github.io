@@ -7,10 +7,10 @@ import ScreenContainer from '../components/ScreenContainer';
 import SectionHeader from '../components/SectionHeader';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
-import { CHANNELS } from '../data/mockData';
 import { MoreStackParamList } from '../navigation/types';
 import { colors } from '../theme/colors';
 import { Channel } from '../types';
+import { getAccessibleChannels } from '../utils/permissions';
 
 type Props = NativeStackScreenProps<MoreStackParamList, 'Communication'>;
 
@@ -21,18 +21,10 @@ const CATEGORY_LABEL: Record<Channel['category'], string> = {
 };
 
 const CommunicationScreen: React.FC<Props> = ({ navigation }) => {
-  const { user, isFunktionaer } = useAuth();
+  const { user } = useAuth();
   const { messages } = useData();
 
-  const visibleChannels = useMemo(() => {
-    return CHANNELS.filter((c) => {
-      if (isFunktionaer) return true;
-      if (c.category === 'funktionaere') return false;
-      if (user?.role === 'spieler') return c.teamId === user.teamId;
-      if (user?.role === 'fan') return !!user.isParentOfYouth && c.teamId === user.parentTeamId;
-      return false;
-    });
-  }, [user, isFunktionaer]);
+  const visibleChannels = useMemo(() => getAccessibleChannels(user), [user]);
 
   const grouped = useMemo(() => {
     const map: Record<Channel['category'], Channel[]> = { mannschaft: [], jugend: [], funktionaere: [] };

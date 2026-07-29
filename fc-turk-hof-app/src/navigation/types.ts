@@ -5,6 +5,7 @@ export type HomeStackParamList = {
 export type CalendarStackParamList = {
   Calendar: undefined;
   EventDetail: { eventId: string };
+  EventForm: undefined;
 };
 
 export type NewsStackParamList = {

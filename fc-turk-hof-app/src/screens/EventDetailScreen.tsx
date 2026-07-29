@@ -1,9 +1,12 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 import Card from '../components/Card';
+import PrimaryButton from '../components/PrimaryButton';
 import ScreenContainer from '../components/ScreenContainer';
-import { EVENTS, teamName } from '../data/mockData';
+import { useAuth } from '../context/AuthContext';
+import { useData } from '../context/DataContext';
+import { teamName } from '../data/mockData';
 import { CalendarStackParamList } from '../navigation/types';
 import { colors } from '../theme/colors';
 import { formatDateLong, formatTimeRange } from '../utils/date';
@@ -16,8 +19,10 @@ const EVENT_TYPE_LABEL: Record<string, string> = {
 
 type Props = NativeStackScreenProps<CalendarStackParamList, 'EventDetail'>;
 
-const EventDetailScreen: React.FC<Props> = ({ route }) => {
-  const event = EVENTS.find((e) => e.id === route.params.eventId);
+const EventDetailScreen: React.FC<Props> = ({ route, navigation }) => {
+  const { isFunktionaer } = useAuth();
+  const { events, deleteEvent } = useData();
+  const event = events.find((e) => e.id === route.params.eventId);
 
   if (!event) {
     return (
@@ -26,6 +31,20 @@ const EventDetailScreen: React.FC<Props> = ({ route }) => {
       </ScreenContainer>
     );
   }
+
+  const handleDelete = () => {
+    Alert.alert('Termin löschen', `"${event.title}" wirklich löschen?`, [
+      { text: 'Abbrechen', style: 'cancel' },
+      {
+        text: 'Löschen',
+        style: 'destructive',
+        onPress: async () => {
+          await deleteEvent(event.id);
+          navigation.goBack();
+        },
+      },
+    ]);
+  };
 
   return (
     <ScreenContainer>
@@ -45,6 +64,10 @@ const EventDetailScreen: React.FC<Props> = ({ route }) => {
           <Text style={styles.description}>{event.description}</Text>
         </Card>
       ) : null}
+
+      {isFunktionaer && (
+        <PrimaryButton label="Termin löschen" onPress={handleDelete} variant="outline" style={{ marginTop: 20 }} />
+      )}
     </ScreenContainer>
   );
 };

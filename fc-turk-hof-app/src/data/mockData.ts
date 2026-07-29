@@ -3,21 +3,34 @@ import {
   Channel,
   ChatMessage,
   FormTemplate,
+  FunktionaerBereich,
   MatchResult,
   NewsItem,
   Player,
   Survey,
   TableRow,
+  TeamId,
   TeamInfo,
 } from '../types';
 
+export const BEREICH_LABELS: Record<FunktionaerBereich, string> = {
+  trainer: 'Trainer',
+  jugendleiter: 'Jugendleiter',
+  vorstand1: '1. Vorstand',
+  vorstand2: '2. Vorstand',
+  kassier: 'Kassier',
+  presse: 'Presse / Öffentlichkeitsarbeit',
+  schriftfuehrer: 'Schriftführer',
+  sonstiges: 'Sonstiges Vorstandsmitglied',
+};
+
+export const bereichLabel = (bereich?: FunktionaerBereich): string =>
+  bereich ? BEREICH_LABELS[bereich] : '';
+
 export const TEAMS: TeamInfo[] = [
-  { id: 'herren1', name: '1. Mannschaft (Herren)', category: 'senior' },
-  { id: 'ah', name: 'Alte Herren', category: 'senior' },
-  { id: 'u19', name: 'U19 Jugend', category: 'jugend' },
-  { id: 'u17', name: 'U17 Jugend', category: 'jugend' },
-  { id: 'u15', name: 'U15 Jugend', category: 'jugend' },
-  { id: 'u13', name: 'U13 Jugend', category: 'jugend' },
+  { id: 'herren1', name: 'Herrenmannschaft', category: 'senior' },
+  { id: 'u11', name: 'U11 Jugend', category: 'jugend' },
+  { id: 'u9', name: 'U9 Jugend', category: 'jugend' },
   { id: 'bambini', name: 'Bambini', category: 'jugend' },
 ];
 
@@ -26,11 +39,12 @@ export const teamName = (id?: string): string =>
 
 export const YOUTH_TEAMS = TEAMS.filter((t) => t.category === 'jugend');
 export const SENIOR_TEAMS = TEAMS.filter((t) => t.category === 'senior');
+export const ALL_TEAM_IDS: TeamId[] = TEAMS.map((t) => t.id);
 
 export const EVENTS: ClubEvent[] = [
   {
     id: 'e1',
-    title: 'Training 1. Mannschaft',
+    title: 'Training Herrenmannschaft',
     date: '2026-07-29',
     time: '18:30',
     endTime: '20:00',
@@ -63,23 +77,23 @@ export const EVENTS: ClubEvent[] = [
   },
   {
     id: 'e4',
-    title: 'Training U19',
+    title: 'Training U11',
     date: '2026-07-31',
     time: '17:30',
     endTime: '19:00',
     location: 'Sportgelände FC Türk Hof, Platz 2',
     type: 'training',
-    teamId: 'u19',
+    teamId: 'u11',
   },
   {
     id: 'e5',
-    title: 'Freundschaftsspiel U15',
+    title: 'Freundschaftsspiel U9',
     date: '2026-08-01',
     time: '11:00',
-    endTime: '12:30',
+    endTime: '12:00',
     location: 'Sportgelände TSV Hof',
     type: 'spiel',
-    teamId: 'u15',
+    teamId: 'u9',
     description: 'Testspiel gegen TSV Hof zur Saisonvorbereitung.',
   },
   {
@@ -94,13 +108,13 @@ export const EVENTS: ClubEvent[] = [
   },
   {
     id: 'e7',
-    title: 'Training U13',
+    title: 'Training Bambini',
     date: '2026-07-30',
     time: '17:00',
-    endTime: '18:15',
+    endTime: '18:00',
     location: 'Sportgelände FC Türk Hof, Platz 2',
     type: 'training',
-    teamId: 'u13',
+    teamId: 'bambini',
   },
   {
     id: 'e8',
@@ -113,6 +127,17 @@ export const EVENTS: ClubEvent[] = [
     teamId: 'herren1',
     description: 'Vereinsfest für alle Mitglieder, Familien und Fans.',
   },
+  {
+    id: 'e9',
+    title: 'Spieltag U11',
+    date: '2026-08-08',
+    time: '10:00',
+    endTime: '13:00',
+    location: 'Sportgelände FC Türk Hof, Platz 2',
+    type: 'spiel',
+    teamId: 'u11',
+    description: 'Rundenturnier mit drei weiteren Vereinen.',
+  },
 ];
 
 export const NEWS: NewsItem[] = [
@@ -121,9 +146,9 @@ export const NEWS: NewsItem[] = [
     title: 'Saisonvorbereitung läuft auf Hochtouren',
     date: '2026-07-27',
     tag: 'Verein',
-    summary: 'Die 1. Mannschaft startet mit intensiven Einheiten in die neue Saison.',
+    summary: 'Die Herrenmannschaft startet mit intensiven Einheiten in die neue Saison.',
     content:
-      'Unsere 1. Mannschaft ist seit dieser Woche wieder im Training. Trainer Cem Yildiz setzt in den ersten Wochen vor allem auf Kondition und Teambuilding. Am 2. August steht bereits das erste Pflichtspiel im Kreispokal gegen den SV Oberkotzau an. Wir freuen uns auf zahlreiche Zuschauer!',
+      'Unsere Herrenmannschaft ist seit dieser Woche wieder im Training. Trainer Cem Yildiz setzt in den ersten Wochen vor allem auf Kondition und Teambuilding. Am 2. August steht bereits das erste Pflichtspiel im Kreispokal gegen den SV Oberkotzau an. Wir freuen uns auf zahlreiche Zuschauer!',
   },
   {
     id: 'n2',
@@ -148,9 +173,9 @@ export const NEWS: NewsItem[] = [
     title: 'Neuer Sponsor an Bord',
     date: '2026-07-15',
     tag: 'Verein',
-    summary: 'Autohaus Demir wird neuer Trikotsponsor der 1. Mannschaft.',
+    summary: 'Autohaus Demir wird neuer Trikotsponsor der Herrenmannschaft.',
     content:
-      'Wir freuen uns, das Autohaus Demir als neuen Hauptsponsor der 1. Mannschaft begrüßen zu dürfen. Die Zusammenarbeit ist zunächst auf drei Jahre angelegt und stärkt die finanzielle Basis des Vereins nachhaltig.',
+      'Wir freuen uns, das Autohaus Demir als neuen Hauptsponsor der Herrenmannschaft begrüßen zu dürfen. Die Zusammenarbeit ist zunächst auf drei Jahre angelegt und stärkt die finanzielle Basis des Vereins nachhaltig.',
   },
 ];
 
@@ -202,39 +227,73 @@ export const RESULTS: MatchResult[] = [
   {
     id: 'r5',
     date: '2026-07-18',
-    competition: 'Testspiel',
-    teamId: 'u19',
-    homeTeam: 'FC Türk Hof U19',
-    awayTeam: 'SC Selb U19',
-    homeScore: 2,
-    awayScore: 0,
+    competition: 'Freundschaftsspiel',
+    teamId: 'u11',
+    homeTeam: 'FC Türk Hof U11',
+    awayTeam: 'SC Selb U11',
+    homeScore: 4,
+    awayScore: 2,
     isHome: true,
   },
   {
     id: 'r6',
     date: '2026-07-11',
-    competition: 'Testspiel',
-    teamId: 'u15',
+    competition: 'Rundenturnier',
+    teamId: 'u9',
     homeTeam: 'DJK Naila',
-    awayTeam: 'FC Türk Hof U15',
-    homeScore: 0,
+    awayTeam: 'FC Türk Hof U9',
+    homeScore: 1,
     awayScore: 3,
     isHome: false,
   },
+  {
+    id: 'r7',
+    date: '2026-07-05',
+    competition: 'Spieltreff',
+    teamId: 'bambini',
+    homeTeam: 'FC Türk Hof Bambini',
+    awayTeam: 'TSV Hof Bambini',
+    homeScore: 0,
+    awayScore: 0,
+    isHome: true,
+  },
 ];
 
-export const TABLE_HERREN1: TableRow[] = [
-  { position: 1, club: 'SV Konradsreuth', played: 30, won: 22, drawn: 5, lost: 3, goalsFor: 78, goalsAgainst: 28, points: 71 },
-  { position: 2, club: 'FC Türk Hof', played: 30, won: 20, drawn: 6, lost: 4, goalsFor: 71, goalsAgainst: 33, points: 66, isOwnTeam: true },
-  { position: 3, club: 'FC Schwarzenbach', played: 30, won: 18, drawn: 7, lost: 5, goalsFor: 65, goalsAgainst: 37, points: 61 },
-  { position: 4, club: 'TSV Münchberg', played: 30, won: 16, drawn: 8, lost: 6, goalsFor: 58, goalsAgainst: 40, points: 56 },
-  { position: 5, club: 'SpVgg Rehau', played: 30, won: 14, drawn: 6, lost: 10, goalsFor: 52, goalsAgainst: 44, points: 48 },
-  { position: 6, club: 'DJK Naila', played: 30, won: 11, drawn: 9, lost: 10, goalsFor: 46, goalsAgainst: 47, points: 42 },
-  { position: 7, club: 'SC Selb', played: 30, won: 10, drawn: 7, lost: 13, goalsFor: 41, goalsAgainst: 50, points: 37 },
-  { position: 8, club: 'TSV Hof', played: 30, won: 8, drawn: 8, lost: 14, goalsFor: 38, goalsAgainst: 55, points: 32 },
-  { position: 9, club: 'SV Oberkotzau', played: 30, won: 6, drawn: 5, lost: 19, goalsFor: 30, goalsAgainst: 68, points: 23 },
-  { position: 10, club: 'FC Helmbrechts', played: 30, won: 3, drawn: 4, lost: 23, goalsFor: 24, goalsAgainst: 81, points: 13 },
-];
+export const TABLES: Record<TeamId, TableRow[]> = {
+  herren1: [
+    { position: 1, club: 'SV Konradsreuth', played: 30, won: 22, drawn: 5, lost: 3, goalsFor: 78, goalsAgainst: 28, points: 71 },
+    { position: 2, club: 'FC Türk Hof', played: 30, won: 20, drawn: 6, lost: 4, goalsFor: 71, goalsAgainst: 33, points: 66, isOwnTeam: true },
+    { position: 3, club: 'FC Schwarzenbach', played: 30, won: 18, drawn: 7, lost: 5, goalsFor: 65, goalsAgainst: 37, points: 61 },
+    { position: 4, club: 'TSV Münchberg', played: 30, won: 16, drawn: 8, lost: 6, goalsFor: 58, goalsAgainst: 40, points: 56 },
+    { position: 5, club: 'SpVgg Rehau', played: 30, won: 14, drawn: 6, lost: 10, goalsFor: 52, goalsAgainst: 44, points: 48 },
+    { position: 6, club: 'DJK Naila', played: 30, won: 11, drawn: 9, lost: 10, goalsFor: 46, goalsAgainst: 47, points: 42 },
+    { position: 7, club: 'SC Selb', played: 30, won: 10, drawn: 7, lost: 13, goalsFor: 41, goalsAgainst: 50, points: 37 },
+    { position: 8, club: 'TSV Hof', played: 30, won: 8, drawn: 8, lost: 14, goalsFor: 38, goalsAgainst: 55, points: 32 },
+    { position: 9, club: 'SV Oberkotzau', played: 30, won: 6, drawn: 5, lost: 19, goalsFor: 30, goalsAgainst: 68, points: 23 },
+    { position: 10, club: 'FC Helmbrechts', played: 30, won: 3, drawn: 4, lost: 23, goalsFor: 24, goalsAgainst: 81, points: 13 },
+  ],
+  u11: [
+    { position: 1, club: 'SC Selb U11', played: 10, won: 8, drawn: 1, lost: 1, goalsFor: 40, goalsAgainst: 12, points: 25 },
+    { position: 2, club: 'FC Türk Hof U11', played: 10, won: 7, drawn: 2, lost: 1, goalsFor: 35, goalsAgainst: 15, points: 23, isOwnTeam: true },
+    { position: 3, club: 'TSV Münchberg U11', played: 10, won: 5, drawn: 2, lost: 3, goalsFor: 28, goalsAgainst: 20, points: 17 },
+    { position: 4, club: 'DJK Naila U11', played: 10, won: 3, drawn: 3, lost: 4, goalsFor: 20, goalsAgainst: 22, points: 12 },
+    { position: 5, club: 'TSV Hof U11', played: 10, won: 2, drawn: 2, lost: 6, goalsFor: 15, goalsAgainst: 30, points: 8 },
+    { position: 6, club: 'SV Oberkotzau U11', played: 10, won: 1, drawn: 2, lost: 7, goalsFor: 10, goalsAgainst: 33, points: 5 },
+  ],
+  u9: [
+    { position: 1, club: 'FC Türk Hof U9', played: 8, won: 6, drawn: 1, lost: 1, goalsFor: 30, goalsAgainst: 10, points: 19, isOwnTeam: true },
+    { position: 2, club: 'DJK Naila U9', played: 8, won: 5, drawn: 2, lost: 1, goalsFor: 26, goalsAgainst: 13, points: 17 },
+    { position: 3, club: 'TSV Hof U9', played: 8, won: 4, drawn: 1, lost: 3, goalsFor: 20, goalsAgainst: 18, points: 13 },
+    { position: 4, club: 'SC Selb U9', played: 8, won: 2, drawn: 2, lost: 4, goalsFor: 14, goalsAgainst: 22, points: 8 },
+    { position: 5, club: 'TSV Münchberg U9', played: 8, won: 0, drawn: 2, lost: 6, goalsFor: 8, goalsAgainst: 25, points: 2 },
+  ],
+  bambini: [
+    { position: 1, club: 'FC Türk Hof Bambini', played: 6, won: 3, drawn: 2, lost: 1, goalsFor: 18, goalsAgainst: 10, points: 11, isOwnTeam: true },
+    { position: 2, club: 'TSV Hof Bambini', played: 6, won: 3, drawn: 1, lost: 2, goalsFor: 16, goalsAgainst: 12, points: 10 },
+    { position: 3, club: 'SC Selb Bambini', played: 6, won: 2, drawn: 2, lost: 2, goalsFor: 12, goalsAgainst: 12, points: 8 },
+    { position: 4, club: 'DJK Naila Bambini', played: 6, won: 1, drawn: 1, lost: 4, goalsFor: 8, goalsAgainst: 20, points: 4 },
+  ],
+};
 
 export const PLAYERS: Player[] = [
   { id: 'p1', name: 'Emre Kaya', number: 1, position: 'Torwart', teamId: 'herren1', birthYear: 1998, initials: 'EK', stats: { games: 28, goals: 0, assists: 0 } },
@@ -244,10 +303,14 @@ export const PLAYERS: Player[] = [
   { id: 'p5', name: 'Baris Demir', number: 10, position: 'Offensives Mittelfeld', teamId: 'herren1', birthYear: 1996, initials: 'BD', stats: { games: 30, goals: 12, assists: 11 } },
   { id: 'p6', name: 'Kaan Öztürk', number: 3, position: 'Linksverteidiger', teamId: 'herren1', birthYear: 2001, initials: 'KÖ', stats: { games: 26, goals: 1, assists: 4 } },
   { id: 'p7', name: 'Yusuf Celik', number: 7, position: 'Rechtsaußen', teamId: 'herren1', birthYear: 2000, initials: 'YC', stats: { games: 25, goals: 8, assists: 7 } },
-  { id: 'p8', name: 'Ali Yavuz', number: 11, position: 'Stürmer', teamId: 'u19', birthYear: 2008, initials: 'AY', stats: { games: 18, goals: 14, assists: 3 } },
-  { id: 'p9', name: 'Serkan Aksoy', number: 8, position: 'Mittelfeld', teamId: 'u19', birthYear: 2008, initials: 'SA', stats: { games: 17, goals: 5, assists: 8 } },
-  { id: 'p10', name: 'Enes Polat', number: 5, position: 'Abwehr', teamId: 'u17', birthYear: 2010, initials: 'EP', stats: { games: 15, goals: 1, assists: 2 } },
-  { id: 'p11', name: 'Timur Aslan', number: 9, position: 'Stürmer', teamId: 'u15', birthYear: 2012, initials: 'TA', stats: { games: 14, goals: 11, assists: 4 } },
+  { id: 'p8', name: 'Ali Yavuz', number: 9, position: 'Stürmer', teamId: 'u11', birthYear: 2015, initials: 'AY', stats: { games: 10, goals: 12, assists: 3 } },
+  { id: 'p9', name: 'Efe Arslan', number: 7, position: 'Mittelfeld', teamId: 'u11', birthYear: 2015, initials: 'EA', stats: { games: 10, goals: 5, assists: 8 } },
+  { id: 'p10', name: 'Kerem Toprak', number: 5, position: 'Abwehr', teamId: 'u11', birthYear: 2016, initials: 'KT', stats: { games: 9, goals: 1, assists: 2 } },
+  { id: 'p11', name: 'Mika Schneider', number: 1, position: 'Torwart', teamId: 'u9', birthYear: 2017, initials: 'MS', stats: { games: 8, goals: 0, assists: 0 } },
+  { id: 'p12', name: 'Leon Weber', number: 9, position: 'Stürmer', teamId: 'u9', birthYear: 2017, initials: 'LW', stats: { games: 8, goals: 9, assists: 4 } },
+  { id: 'p13', name: 'Ada Kurt', number: 8, position: 'Mittelfeld', teamId: 'u9', birthYear: 2018, initials: 'AK', stats: { games: 7, goals: 3, assists: 5 } },
+  { id: 'p14', name: 'Finn Bauer', number: 4, position: 'Allrounder', teamId: 'bambini', birthYear: 2019, initials: 'FB', stats: { games: 6, goals: 4, assists: 2 } },
+  { id: 'p15', name: 'Elif Şahin', number: 6, position: 'Allrounder', teamId: 'bambini', birthYear: 2020, initials: 'EŞ', stats: { games: 6, goals: 3, assists: 3 } },
 ];
 
 export const FORMS: FormTemplate[] = [
@@ -304,7 +367,7 @@ export const FORMS: FormTemplate[] = [
 export const SURVEYS: Survey[] = [
   {
     id: 's1',
-    title: 'Fahrgemeinschaften Auswärtsspiele U15',
+    title: 'Fahrgemeinschaften Auswärtsspiele',
     description: 'Damit die Fahrten zu Auswärtsspielen organisiert werden können, bitten wir alle Eltern um eine Rückmeldung zur Mitfahrbereitschaft.',
     audience: 'eltern_jugend',
     deadline: '2026-08-05',
@@ -327,7 +390,7 @@ export const SURVEYS: Survey[] = [
   },
   {
     id: 's3',
-    title: 'Wunschtermin Teamabend 1. Mannschaft',
+    title: 'Wunschtermin Teamabend Herrenmannschaft',
     description: 'An welchem Abend soll der gemeinsame Teamabend vor dem Saisonstart stattfinden?',
     audience: 'spieler_mannschaft',
     deadline: '2026-08-01',
@@ -354,55 +417,34 @@ export const SURVEYS: Survey[] = [
 export const CHANNELS: Channel[] = [
   {
     id: 'c1',
-    name: '1. Mannschaft',
+    name: 'Herrenmannschaft',
     category: 'mannschaft',
     teamId: 'herren1',
-    description: 'Interner Austausch der 1. Mannschaft.',
+    description: 'Interner Austausch der Herrenmannschaft.',
   },
   {
     id: 'c2',
-    name: 'Alte Herren',
-    category: 'mannschaft',
-    teamId: 'ah',
-    description: 'Interner Austausch der Alten Herren.',
+    name: 'U11 Jugend',
+    category: 'jugend',
+    teamId: 'u11',
+    description: 'Team- und Elternkommunikation U11.',
   },
   {
     id: 'c3',
-    name: 'U19 Jugend',
+    name: 'U9 Jugend',
     category: 'jugend',
-    teamId: 'u19',
-    description: 'Team- und Elternkommunikation U19.',
+    teamId: 'u9',
+    description: 'Team- und Elternkommunikation U9.',
   },
   {
     id: 'c4',
-    name: 'U17 Jugend',
-    category: 'jugend',
-    teamId: 'u17',
-    description: 'Team- und Elternkommunikation U17.',
-  },
-  {
-    id: 'c5',
-    name: 'U15 Jugend',
-    category: 'jugend',
-    teamId: 'u15',
-    description: 'Team- und Elternkommunikation U15.',
-  },
-  {
-    id: 'c6',
-    name: 'U13 Jugend',
-    category: 'jugend',
-    teamId: 'u13',
-    description: 'Team- und Elternkommunikation U13.',
-  },
-  {
-    id: 'c7',
     name: 'Bambini',
     category: 'jugend',
     teamId: 'bambini',
     description: 'Team- und Elternkommunikation Bambini.',
   },
   {
-    id: 'c8',
+    id: 'c5',
     name: 'Vorstand & Funktionäre',
     category: 'funktionaere',
     description: 'Interner Austausch für Vorstand, Trainer und Betreuer.',
@@ -428,15 +470,15 @@ export const INITIAL_MESSAGES: ChatMessage[] = [
   },
   {
     id: 'm3',
-    channelId: 'c3',
-    author: 'Trainerteam U19',
+    channelId: 'c2',
+    author: 'Trainerteam U11',
     role: 'funktionaer',
-    text: 'Testspiel am Samstag gegen SC Selb wurde bestätigt. Treffpunkt 9:45 Uhr am Vereinsheim.',
+    text: 'Spieltag am Samstag wurde bestätigt. Treffpunkt 9:45 Uhr am Vereinsheim.',
     timestamp: '2026-07-28T17:00:00',
   },
   {
     id: 'm4',
-    channelId: 'c5',
+    channelId: 'c3',
     author: 'Jugendleitung',
     role: 'funktionaer',
     text: 'Bitte die Umfrage zu den Fahrgemeinschaften bis Mittwoch ausfüllen. Danke euch!',
@@ -444,8 +486,8 @@ export const INITIAL_MESSAGES: ChatMessage[] = [
   },
   {
     id: 'm5',
-    channelId: 'c8',
-    author: '1. Vorsitzender',
+    channelId: 'c5',
+    author: '1. Vorstand',
     role: 'funktionaer',
     text: 'Nächste Vorstandssitzung morgen 19 Uhr im Vereinsheim, Tagesordnung folgt per Mail.',
     timestamp: '2026-07-29T09:00:00',
