@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Image, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Chip from '../components/Chip';
 import PrimaryButton from '../components/PrimaryButton';
 import ScreenContainer from '../components/ScreenContainer';
@@ -67,9 +67,7 @@ const LoginScreen: React.FC = () => {
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScreenContainer>
         <View style={styles.header}>
-          <View style={styles.logo}>
-            <Text style={styles.logoText}>FTH</Text>
-          </View>
+          <Image source={require('../../assets/club-logo.png')} style={styles.logo} resizeMode="contain" />
           <Text style={styles.clubName}>FC Türk Hof</Text>
           <Text style={styles.tagline}>Vereins-App · Anmeldung</Text>
         </View>
@@ -203,18 +201,9 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   logo: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 104,
+    height: 104,
     marginBottom: 12,
-  },
-  logoText: {
-    color: colors.white,
-    fontSize: 22,
-    fontWeight: '800',
   },
   clubName: {
     fontSize: 24,
