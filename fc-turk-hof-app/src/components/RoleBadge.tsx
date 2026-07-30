@@ -3,13 +3,13 @@ import { StyleSheet, Text, View } from 'react-native';
 import { roleColors } from '../theme/colors';
 import { Role } from '../types';
 
-const ROLE_LABELS: Record<Role, string> = {
+export const ROLE_LABELS: Record<Role, string> = {
   spieler: 'Spieler',
   fan: 'Fan',
   funktionaer: 'Funktionär',
 };
 
-const RoleBadge: React.FC<{ role: Role }> = ({ role }) => {
+const SingleBadge: React.FC<{ role: Role }> = ({ role }) => {
   const color = roleColors[role];
   return (
     <View style={[styles.badge, { backgroundColor: `${color}22`, borderColor: color }]}>
@@ -18,7 +18,21 @@ const RoleBadge: React.FC<{ role: Role }> = ({ role }) => {
   );
 };
 
+/** Zeigt eine oder mehrere Rollen-Badges nebeneinander an (umbrechend). */
+const RoleBadge: React.FC<{ roles: Role[] }> = ({ roles }) => (
+  <View style={styles.row}>
+    {roles.map((role) => (
+      <SingleBadge key={role} role={role} />
+    ))}
+  </View>
+);
+
 const styles = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
   badge: {
     borderRadius: 999,
     paddingHorizontal: 10,

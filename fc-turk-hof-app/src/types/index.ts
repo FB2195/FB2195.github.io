@@ -23,7 +23,8 @@ export type FunktionaerBereich =
 export interface AppUser {
   id: string;
   name: string;
-  role: Role;
+  /** Ein Nutzer kann mehrere Rollen gleichzeitig haben (z.B. Spieler + Trainer) */
+  roles: Role[];
   /** Spieler: eigenes Team */
   teamId?: TeamId;
   /** Fan: ist Erziehungsberechtigte/r eines Jugendspielers */
@@ -37,6 +38,14 @@ export interface AppUser {
   /** Funktionär mit Bereich "trainer": trainierte Teams */
   coachedTeamIds?: TeamId[];
   avatarInitials: string;
+
+  // Persönliche Daten (Pflichtangaben bei der Anmeldung)
+  email: string;
+  phone: string;
+  birthDate: string; // TT.MM.JJJJ
+  street: string;
+  postalCode: string;
+  city: string;
 }
 
 export type EventType = 'training' | 'spiel' | 'sonstiges';
@@ -143,6 +152,15 @@ export interface Survey {
   audience: SurveyAudience;
   deadline: string;
   options: SurveyOption[];
+}
+
+export type SponsorTier = 'haupt' | 'ausruester' | 'partner';
+
+export interface Sponsor {
+  id: string;
+  name: string;
+  tier: SponsorTier;
+  category: string;
 }
 
 export type ChannelCategory = 'mannschaft' | 'jugend' | 'funktionaere';

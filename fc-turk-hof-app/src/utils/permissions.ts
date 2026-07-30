@@ -1,39 +1,43 @@
 import { CHANNELS } from '../data/mockData';
-import { AppUser, Channel, TeamId } from '../types';
+import { AppUser, Channel, Role, TeamId } from '../types';
 
 /**
- * Zentrale Zugriffslogik für die Team-Kommunikation:
- * - Spieler sehen nur den Kanal ihres eigenen Teams.
+ * Zentrale Zugriffslogik für die Team-Kommunikation. Ein Nutzer kann mehrere
+ * Rollen gleichzeitig haben (z.B. Spieler + Trainer) - der Zugriff ergibt
+ * sich aus der Vereinigung aller Rollen:
+ * - Spieler sehen den Kanal ihres eigenen Teams.
  * - Trainer sehen die Kanäle der von ihnen ausgewählten Teams (+ Funktionäre-Kanal).
  * - Der Jugendleiter sieht alle Jugend-Kanäle (+ Funktionäre-Kanal).
  * - Übrige Funktionäre (Vorstand, Kassier, Presse, Schriftführer, Sonstige)
  *   sehen nur den Funktionäre-Kanal, keine Mannschafts-/Jugendkanäle.
- * - Eltern von Jugendspielern sehen nur den Kanal des Teams ihres Kindes.
- * - Fans ohne Elternstatus haben keinen Kanalzugriff.
+ * - Eltern von Jugendspielern sehen den Kanal des Teams ihres Kindes.
  */
 export function getAccessibleChannels(user: AppUser | null): Channel[] {
   if (!user) return [];
+  const roles = user.roles ?? [];
+  const result = new Map<string, Channel>();
+  const add = (list: Channel[]) => list.forEach((c) => result.set(c.id, c));
 
-  if (user.role === 'funktionaer') {
+  if (roles.includes('funktionaer')) {
     if (user.bereich === 'trainer') {
       const coached = user.coachedTeamIds ?? [];
-      return CHANNELS.filter((c) => c.category === 'funktionaere' || (!!c.teamId && coached.includes(c.teamId)));
+      add(CHANNELS.filter((c) => c.category === 'funktionaere' || (!!c.teamId && coached.includes(c.teamId))));
+    } else if (user.bereich === 'jugendleiter') {
+      add(CHANNELS.filter((c) => c.category === 'funktionaere' || c.category === 'jugend'));
+    } else {
+      add(CHANNELS.filter((c) => c.category === 'funktionaere'));
     }
-    if (user.bereich === 'jugendleiter') {
-      return CHANNELS.filter((c) => c.category === 'funktionaere' || c.category === 'jugend');
-    }
-    return CHANNELS.filter((c) => c.category === 'funktionaere');
   }
 
-  if (user.role === 'spieler') {
-    return CHANNELS.filter((c) => c.teamId === user.teamId);
+  if (roles.includes('spieler') && user.teamId) {
+    add(CHANNELS.filter((c) => c.teamId === user.teamId));
   }
 
-  if (user.role === 'fan' && user.isParentOfYouth && user.parentTeamId) {
-    return CHANNELS.filter((c) => c.teamId === user.parentTeamId);
+  if (roles.includes('fan') && user.isParentOfYouth && user.parentTeamId) {
+    add(CHANNELS.filter((c) => c.teamId === user.parentTeamId));
   }
 
-  return [];
+  return Array.from(result.values());
 }
 
 export function canAccessChannel(user: AppUser | null, channelId: string): boolean {
@@ -41,12 +45,22 @@ export function canAccessChannel(user: AppUser | null, channelId: string): boole
 }
 
 /**
- * Ergebnisse/Tabelle: Eltern von Jugendspielern sehen ausschließlich das Team
- * ihres Kindes (kein Umschalten). Alle anderen Rollen sehen alle Teams.
+ * Ergebnisse/Tabelle: Wer AUSSCHLIESSLICH Elternteil eines Jugendspielers ist
+ * (keine weitere Rolle), sieht nur das Team des eigenen Kindes. Sobald eine
+ * weitere Rolle (Spieler, Funktionär) hinzukommt, gilt der volle Zugriff.
  */
 export function getResultsScope(user: AppUser | null): TeamId[] | 'all' {
-  if (user?.role === 'fan' && user.isParentOfYouth && user.parentTeamId) {
+  const roles = user?.roles ?? [];
+  const onlyParent = roles.length === 1 && roles[0] === 'fan' && user?.isParentOfYouth;
+  if (onlyParent && user?.parentTeamId) {
     return [user.parentTeamId];
   }
   return 'all';
+}
+
+/** Für Anzeigezwecke (z.B. Chat-Absender-Rolle): wichtigste Rolle zuerst. */
+const ROLE_PRIORITY: Role[] = ['funktionaer', 'spieler', 'fan'];
+
+export function getPrimaryRole(roles: Role[]): Role {
+  return ROLE_PRIORITY.find((r) => roles.includes(r)) ?? 'fan';
 }

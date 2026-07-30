@@ -7,6 +7,7 @@ import { BEREICH_LABELS, SENIOR_TEAMS, TEAMS, YOUTH_TEAMS } from '../data/mockDa
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../theme/colors';
 import { FunktionaerBereich, Role, TeamId } from '../types';
+import { isValidBirthDate, isValidEmail, isValidPhone, isValidPostalCode } from '../utils/validators';
 
 const ROLES: { id: Role; label: string; hint: string }[] = [
   { id: 'spieler', label: 'Spieler', hint: 'Aktiver Spieler einer Mannschaft' },
@@ -21,24 +22,57 @@ const BEREICHE = (Object.keys(BEREICH_LABELS) as FunktionaerBereich[]).map((id) 
 
 const LoginScreen: React.FC = () => {
   const { login } = useAuth();
+
+  // Persönliche Daten
   const [name, setName] = useState('');
-  const [role, setRole] = useState<Role>('spieler');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [birthDate, setBirthDate] = useState('');
+  const [street, setStreet] = useState('');
+  const [postalCode, setPostalCode] = useState('');
+  const [city, setCity] = useState('');
+
+  // Rollen (Mehrfachauswahl)
+  const [roles, setRoles] = useState<Role[]>([]);
+
+  // Spieler
   const [teamId, setTeamId] = useState<TeamId | undefined>(undefined);
+
+  // Fan / Elternteil
   const [isParentOfYouth, setIsParentOfYouth] = useState(false);
   const [childName, setChildName] = useState('');
   const [parentTeamId, setParentTeamId] = useState<TeamId | undefined>(undefined);
+
+  // Funktionär
   const [bereich, setBereich] = useState<FunktionaerBereich | undefined>(undefined);
   const [coachedTeamIds, setCoachedTeamIds] = useState<TeamId[]>([]);
+
   const [submitting, setSubmitting] = useState(false);
 
   const trimmedName = name.trim();
   const trimmedChildName = childName.trim();
+  const trimmedStreet = street.trim();
+  const trimmedCity = city.trim();
+
+  const personalDataValid =
+    trimmedName.length > 1 &&
+    isValidEmail(email) &&
+    isValidPhone(phone) &&
+    isValidBirthDate(birthDate) &&
+    trimmedStreet.length > 1 &&
+    isValidPostalCode(postalCode) &&
+    trimmedCity.length > 1;
 
   const canSubmit =
-    trimmedName.length > 1 &&
-    (role !== 'spieler' || !!teamId) &&
-    (role !== 'fan' || !isParentOfYouth || (trimmedChildName.length > 1 && !!parentTeamId)) &&
-    (role !== 'funktionaer' || (!!bereich && (bereich !== 'trainer' || coachedTeamIds.length > 0)));
+    personalDataValid &&
+    roles.length > 0 &&
+    (!roles.includes('spieler') || !!teamId) &&
+    (!roles.includes('fan') || !isParentOfYouth || (trimmedChildName.length > 1 && !!parentTeamId)) &&
+    (!roles.includes('funktionaer') || (!!bereich && (bereich !== 'trainer' || coachedTeamIds.length > 0)));
+
+  const toggleRole = (id: Role) => {
+    setRoles((prev) => (prev.includes(id) ? prev.filter((r) => r !== id) : [...prev, id]));
+  };
 
   const toggleCoachedTeam = (id: TeamId) => {
     setCoachedTeamIds((prev) => (prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]));
@@ -50,13 +84,19 @@ const LoginScreen: React.FC = () => {
     try {
       await login({
         name: trimmedName,
-        role,
-        teamId: role === 'spieler' ? teamId : undefined,
-        isParentOfYouth: role === 'fan' ? isParentOfYouth : undefined,
-        childName: role === 'fan' && isParentOfYouth ? trimmedChildName : undefined,
-        parentTeamId: role === 'fan' && isParentOfYouth ? parentTeamId : undefined,
-        bereich: role === 'funktionaer' ? bereich : undefined,
-        coachedTeamIds: role === 'funktionaer' && bereich === 'trainer' ? coachedTeamIds : undefined,
+        roles,
+        email,
+        phone,
+        birthDate,
+        street,
+        postalCode,
+        city,
+        teamId: roles.includes('spieler') ? teamId : undefined,
+        isParentOfYouth: roles.includes('fan') ? isParentOfYouth : undefined,
+        childName: roles.includes('fan') && isParentOfYouth ? trimmedChildName : undefined,
+        parentTeamId: roles.includes('fan') && isParentOfYouth ? parentTeamId : undefined,
+        bereich: roles.includes('funktionaer') ? bereich : undefined,
+        coachedTeamIds: roles.includes('funktionaer') && bereich === 'trainer' ? coachedTeamIds : undefined,
       });
     } finally {
       setSubmitting(false);
@@ -72,6 +112,8 @@ const LoginScreen: React.FC = () => {
           <Text style={styles.tagline}>Vereins-App · Anmeldung</Text>
         </View>
 
+        <Text style={styles.sectionTitle}>Persönliche Daten</Text>
+
         <Text style={styles.label}>Name</Text>
         <TextInput
           value={name}
@@ -82,21 +124,89 @@ const LoginScreen: React.FC = () => {
           autoCapitalize="words"
         />
 
-        <Text style={styles.label}>Rolle</Text>
-        <View style={styles.roleRow}>
-          {ROLES.map((r) => (
-            <TouchableOpacity
-              key={r.id}
-              style={[styles.roleCard, role === r.id && styles.roleCardActive]}
-              onPress={() => setRole(r.id)}
-            >
-              <Text style={[styles.roleLabel, role === r.id && styles.roleLabelActive]}>{r.label}</Text>
-              <Text style={[styles.roleHint, role === r.id && styles.roleHintActive]}>{r.hint}</Text>
-            </TouchableOpacity>
-          ))}
+        <Text style={styles.label}>E-Mail-Adresse</Text>
+        <TextInput
+          value={email}
+          onChangeText={setEmail}
+          placeholder="name@beispiel.de"
+          placeholderTextColor={colors.textMuted}
+          style={[styles.input, email.length > 0 && !isValidEmail(email) && styles.inputError]}
+          autoCapitalize="none"
+          keyboardType="email-address"
+        />
+
+        <Text style={styles.label}>Telefonnummer</Text>
+        <TextInput
+          value={phone}
+          onChangeText={setPhone}
+          placeholder="+49 151 12345678"
+          placeholderTextColor={colors.textMuted}
+          style={[styles.input, phone.length > 0 && !isValidPhone(phone) && styles.inputError]}
+          keyboardType="phone-pad"
+        />
+
+        <Text style={styles.label}>Geburtsdatum</Text>
+        <TextInput
+          value={birthDate}
+          onChangeText={setBirthDate}
+          placeholder="TT.MM.JJJJ"
+          placeholderTextColor={colors.textMuted}
+          style={[styles.input, birthDate.length > 0 && !isValidBirthDate(birthDate) && styles.inputError]}
+        />
+
+        <Text style={styles.label}>Straße & Hausnummer</Text>
+        <TextInput
+          value={street}
+          onChangeText={setStreet}
+          placeholder="Musterstraße 12"
+          placeholderTextColor={colors.textMuted}
+          style={styles.input}
+        />
+
+        <View style={styles.row}>
+          <View style={{ flex: 1, marginRight: 8 }}>
+            <Text style={styles.label}>PLZ</Text>
+            <TextInput
+              value={postalCode}
+              onChangeText={setPostalCode}
+              placeholder="95028"
+              placeholderTextColor={colors.textMuted}
+              style={[styles.input, postalCode.length > 0 && !isValidPostalCode(postalCode) && styles.inputError]}
+              keyboardType="number-pad"
+              maxLength={5}
+            />
+          </View>
+          <View style={{ flex: 2 }}>
+            <Text style={styles.label}>Ort</Text>
+            <TextInput
+              value={city}
+              onChangeText={setCity}
+              placeholder="Hof"
+              placeholderTextColor={colors.textMuted}
+              style={styles.input}
+            />
+          </View>
         </View>
 
-        {role === 'spieler' && (
+        <Text style={styles.sectionTitle}>Rolle(n)</Text>
+        <Text style={styles.hint}>Mehrfachauswahl möglich, z.B. Spieler und gleichzeitig Trainer.</Text>
+        <View style={styles.roleRow}>
+          {ROLES.map((r) => {
+            const selected = roles.includes(r.id);
+            return (
+              <TouchableOpacity
+                key={r.id}
+                style={[styles.roleCard, selected && styles.roleCardActive]}
+                onPress={() => toggleRole(r.id)}
+              >
+                <Text style={[styles.roleLabel, selected && styles.roleLabelActive]}>{r.label}</Text>
+                <Text style={[styles.roleHint, selected && styles.roleHintActive]}>{r.hint}</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
+        {roles.includes('spieler') && (
           <View>
             <Text style={styles.label}>Deine Mannschaft</Text>
             <Text style={styles.groupLabel}>Aktive / Senioren</Text>
@@ -114,7 +224,7 @@ const LoginScreen: React.FC = () => {
           </View>
         )}
 
-        {role === 'fan' && (
+        {roles.includes('fan') && (
           <View>
             <TouchableOpacity style={styles.checkboxRow} onPress={() => setIsParentOfYouth((v) => !v)}>
               <View style={[styles.checkbox, isParentOfYouth && styles.checkboxChecked]}>
@@ -152,7 +262,7 @@ const LoginScreen: React.FC = () => {
           </View>
         )}
 
-        {role === 'funktionaer' && (
+        {roles.includes('funktionaer') && (
           <View>
             <Text style={styles.label}>Zuständigkeitsbereich</Text>
             <View style={styles.chipRow}>
@@ -197,7 +307,7 @@ const LoginScreen: React.FC = () => {
 const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
-    marginBottom: 28,
+    marginBottom: 20,
     marginTop: 12,
   },
   logo: {
@@ -215,11 +325,18 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     marginTop: 4,
   },
+  sectionTitle: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: colors.text,
+    marginTop: 20,
+    marginBottom: 4,
+  },
   label: {
     fontSize: 14,
     fontWeight: '700',
     color: colors.text,
-    marginTop: 18,
+    marginTop: 14,
     marginBottom: 8,
   },
   groupLabel: {
@@ -239,9 +356,16 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: colors.text,
   },
+  inputError: {
+    borderColor: colors.danger,
+  },
+  row: {
+    flexDirection: 'row',
+  },
   roleRow: {
     flexDirection: 'row',
     gap: 8,
+    marginTop: 10,
   },
   roleCard: {
     flex: 1,
@@ -308,6 +432,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: colors.textMuted,
     marginTop: 4,
+    marginBottom: 8,
     fontStyle: 'italic',
   },
   disclaimer: {

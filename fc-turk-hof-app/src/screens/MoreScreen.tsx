@@ -2,6 +2,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Card from '../components/Card';
+import RoleBadge from '../components/RoleBadge';
 import { useAuth } from '../context/AuthContext';
 import { MoreStackParamList } from '../navigation/types';
 import { colors } from '../theme/colors';
@@ -17,7 +18,9 @@ const MoreScreen: React.FC<Props> = ({ navigation }) => {
     { label: 'Formulare', icon: '📝', screen: 'Forms', visible: true },
     { label: 'Umfragen', icon: '🗳️', screen: 'Surveys', visible: true },
     { label: 'Team-Kommunikation', icon: '💬', screen: 'Communication', visible: true },
-    { label: 'Profil & Einstellungen', icon: '⚙️', screen: 'Profile', visible: true },
+    { label: 'Vereinsinfo', icon: 'ℹ️', screen: 'Vereinsinfo', visible: true },
+    { label: 'Sponsoren', icon: '🤝', screen: 'Sponsoren', visible: true },
+    { label: 'Einstellungen', icon: '⚙️', screen: 'Settings', visible: true },
   ];
 
   return (
@@ -26,9 +29,10 @@ const MoreScreen: React.FC<Props> = ({ navigation }) => {
         <View style={styles.avatar}>
           <Text style={styles.avatarText}>{user?.avatarInitials}</Text>
         </View>
-        <View>
+        <View style={{ flex: 1 }}>
           <Text style={styles.userName}>{user?.name}</Text>
           <Text style={styles.userRole}>FC Türk Hof · Mitgliederbereich</Text>
+          {user ? <RoleBadge roles={user.roles} /> : null}
         </View>
       </Card>
 

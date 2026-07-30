@@ -7,6 +7,7 @@ import {
   MatchResult,
   NewsItem,
   Player,
+  Sponsor,
   Survey,
   TableRow,
   TeamId,
@@ -492,4 +493,20 @@ export const INITIAL_MESSAGES: ChatMessage[] = [
     text: 'Nächste Vorstandssitzung morgen 19 Uhr im Vereinsheim, Tagesordnung folgt per Mail.',
     timestamp: '2026-07-29T09:00:00',
   },
+];
+
+export const SPONSOR_TIER_LABELS: Record<Sponsor['tier'], string> = {
+  haupt: 'Hauptsponsor',
+  ausruester: 'Ausrüster',
+  partner: 'Partner',
+};
+
+export const SPONSORS: Sponsor[] = [
+  { id: 'sp1', name: 'Autohaus Demir', tier: 'haupt', category: 'Trikotsponsor Herrenmannschaft' },
+  { id: 'sp2', name: 'Hofer Getränkemarkt', tier: 'haupt', category: 'Trikotsponsor Jugend' },
+  { id: 'sp3', name: 'SportArt Hof', tier: 'ausruester', category: 'Trainingsausstattung' },
+  { id: 'sp4', name: 'Sparkasse Hochfranken', tier: 'partner', category: 'Bankpartner' },
+  { id: 'sp5', name: 'Pizzeria Bella Napoli', tier: 'partner', category: 'Catering Sommerfest' },
+  { id: 'sp6', name: 'Fitnessstudio Hof', tier: 'partner', category: 'Fitness & Reha' },
+  { id: 'sp7', name: 'Frisör Ayaz', tier: 'partner', category: 'Vereinspartner' },
 ];

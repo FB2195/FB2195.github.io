@@ -16,7 +16,7 @@ const FormsScreen: React.FC<Props> = ({ navigation }) => {
   const { user } = useAuth();
   const { submissions } = useData();
 
-  const visibleForms = FORMS.filter((f) => !user || f.targetRoles.includes(user.role));
+  const visibleForms = FORMS.filter((f) => !user || f.targetRoles.some((r) => user.roles.includes(r)));
 
   if (visibleForms.length === 0) {
     return (

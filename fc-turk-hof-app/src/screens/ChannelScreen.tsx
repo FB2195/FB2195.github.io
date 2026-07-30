@@ -16,7 +16,7 @@ import { CHANNELS } from '../data/mockData';
 import { MoreStackParamList } from '../navigation/types';
 import { colors } from '../theme/colors';
 import { ChatMessage } from '../types';
-import { canAccessChannel } from '../utils/permissions';
+import { canAccessChannel, getPrimaryRole } from '../utils/permissions';
 
 type Props = NativeStackScreenProps<MoreStackParamList, 'Channel'>;
 
@@ -49,7 +49,7 @@ const ChannelScreen: React.FC<Props> = ({ route, navigation }) => {
 
   const handleSend = () => {
     if (!text.trim()) return;
-    sendMessage(channel.id, user.name, user.role, text);
+    sendMessage(channel.id, user.name, getPrimaryRole(user.roles), text);
     setText('');
   };
 

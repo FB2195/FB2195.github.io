@@ -27,6 +27,9 @@ export type MoreStackParamList = {
   Communication: undefined;
   Channel: { channelId: string };
   Profile: undefined;
+  Settings: undefined;
+  Vereinsinfo: undefined;
+  Sponsoren: undefined;
 };
 
 export type MainTabParamList = {

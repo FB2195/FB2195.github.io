@@ -41,18 +41,21 @@ const HomeScreen: React.FC = () => {
     navigation.navigate(tab, screen ? { screen } : undefined);
   };
 
+  const subGreetingParts: string[] = [];
+  if (user?.roles.includes('spieler')) subGreetingParts.push(teamName(user.teamId));
+  if (user?.roles.includes('fan')) {
+    subGreetingParts.push(isYouthParent ? `Elternteil · ${teamName(user?.parentTeamId)}` : 'Fan & Mitglied');
+  }
+  if (user?.roles.includes('funktionaer')) subGreetingParts.push(bereichLabel(user.bereich));
+
   return (
     <ScreenContainer>
       <View style={styles.greetingRow}>
-        <View>
+        <View style={{ flex: 1 }}>
           <Text style={styles.greeting}>Willkommen, {user?.name?.split(' ')[0]}!</Text>
-          <Text style={styles.subGreeting}>
-            {user?.role === 'spieler' && teamName(user.teamId)}
-            {user?.role === 'fan' && (isYouthParent ? `Elternteil · ${teamName(user?.parentTeamId)}` : 'Fan & Mitglied')}
-            {user?.role === 'funktionaer' && bereichLabel(user.bereich)}
-          </Text>
+          <Text style={styles.subGreeting}>{subGreetingParts.join(' · ')}</Text>
         </View>
-        {user ? <RoleBadge role={user.role} /> : null}
+        {user ? <RoleBadge roles={user.roles} /> : null}
       </View>
 
       <SectionHeader title="Nächste Termine" actionLabel="Alle anzeigen" onAction={() => goTab('CalendarTab')} />

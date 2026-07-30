@@ -17,7 +17,10 @@ import PlayerDetailScreen from '../screens/PlayerDetailScreen';
 import PlayersScreen from '../screens/PlayersScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import ResultsScreen from '../screens/ResultsScreen';
+import SettingsScreen from '../screens/SettingsScreen';
+import SponsorenScreen from '../screens/SponsorenScreen';
 import SurveysScreen from '../screens/SurveysScreen';
+import VereinsinfoScreen from '../screens/VereinsinfoScreen';
 import { colors } from '../theme/colors';
 import {
   CalendarStackParamList,
@@ -79,6 +82,9 @@ const MoreStackNavigator = () => (
     <MoreStack.Screen name="Communication" component={CommunicationScreen} options={{ title: 'Team-Kommunikation' }} />
     <MoreStack.Screen name="Channel" component={ChannelScreen} options={{ title: 'Kanal' }} />
     <MoreStack.Screen name="Profile" component={ProfileScreen} options={{ title: 'Profil' }} />
+    <MoreStack.Screen name="Settings" component={SettingsScreen} options={{ title: 'Einstellungen' }} />
+    <MoreStack.Screen name="Vereinsinfo" component={VereinsinfoScreen} options={{ title: 'Vereinsinfo' }} />
+    <MoreStack.Screen name="Sponsoren" component={SponsorenScreen} options={{ title: 'Sponsoren' }} />
   </MoreStack.Navigator>
 );
 
