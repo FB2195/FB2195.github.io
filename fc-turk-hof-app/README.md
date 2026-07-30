@@ -10,7 +10,9 @@ Herrenmannschaft, U11, U9, Bambini.
 
 ## Rollen & Zugriffsrechte
 
-Beim Login (Demo, kein Passwort) wählt man eine Rolle und passende Zusatzangaben:
+Beim Login (Demo, kein Passwort) gibt man persönliche Daten (Name, E-Mail, Telefon, Geburtsdatum,
+Adresse) an und wählt **eine oder mehrere Rollen gleichzeitig** (z. B. Spieler *und* Trainer).
+Die Zugriffsrechte ergeben sich aus der Vereinigung aller gewählten Rollen.
 
 - **Spieler** – wählt sein Team. Sieht ausschließlich den Chat-Kanal des eigenen Teams.
 - **Fan** – optional als *Elternteil eines Jugendspielers* mit Name des Kindes + Jugendteam.
@@ -30,7 +32,9 @@ Die komplette Zugriffslogik für Chat-Kanäle und Ergebnis-Sichtbarkeit ist zent
 
 ## Features
 
-- **Rollen-Login** mit lokaler Persistenz per `AsyncStorage`.
+- **Rollen-Login mit Mehrfachauswahl** und erweiterten Pflichtangaben (Name, E-Mail, Telefon,
+  Geburtsdatum, Adresse), lokale Persistenz per `AsyncStorage`.
+- **Bearbeitbares Profil**: Persönliche Daten können jederzeit in der App geändert werden.
 - **Terminkalender**: Monatsansicht, Filter „Meine Mannschaft“/„Alle Termine“, Termine anlegen
   und löschen (nur Funktionäre), Detailansicht.
 - **News/Ankündigungen**: Liste + Detailansicht, für alle sichtbar.
@@ -41,10 +45,14 @@ Die komplette Zugriffslogik für Chat-Kanäle und Ergebnis-Sichtbarkeit ist zent
   Herrenmannschaft* sehen und beantworten ausschließlich ihre eigenen Umfragen.
 - **Team-Kommunikation**: Kanäle je Team + interner Funktionäre-Kanal, Zugriff exakt wie oben
   beschrieben geregelt.
-- **Lokale Benachrichtigungen**: Berechtigungsabfrage beim Login, Test-Button im Profil, sowie
-  automatische Benachrichtigung beim Anlegen eines neuen Termins. **Wichtig:** Das sind reine
-  On-Device-Benachrichtigungen. Echte Push-Nachrichten zwischen verschiedenen Handys (z. B. „neue
-  Chat-Nachricht von einem Mitspieler“) erfordern zusätzlich ein Backend, siehe unten.
+- **Vereinsinfo**: Kontakt, Adresse, Vorstandsübersicht.
+- **Sponsoren**: Hauptsponsoren, Ausrüster und Partner in Kategorien.
+- **Einstellungen**: Benachrichtigungen ein/aus, Profil-Zugriff, Abmelden, App-Info.
+- **Lokale Benachrichtigungen**: Berechtigungsabfrage beim Login, Test-Button in den
+  Einstellungen, sowie automatische Benachrichtigung beim Anlegen eines neuen Termins.
+  **Wichtig:** Das sind reine On-Device-Benachrichtigungen. Echte Push-Nachrichten zwischen
+  verschiedenen Handys (z. B. „neue Chat-Nachricht von einem Mitspieler“) erfordern zusätzlich
+  ein Backend, siehe unten.
 
 ## ⚠️ Wichtige Einschränkung: kein Backend
 
